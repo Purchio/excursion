@@ -1,7 +1,6 @@
 * {
   font-family: Verdana;
   text-align: center;
-  color: White;
   background-color: Black;
 }
 
@@ -17,11 +16,13 @@
 
 h1 {
   font-weight: normal;
+  color: White;
   font-size: 50px;
 }
 
 h2 {
   font-size: 42px;
+  color: White;
   font-weight: 300;
 }
 
