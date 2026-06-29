@@ -1,0 +1,532 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0f0f14;
+  --surface: #1a1a24;
+  --surface-2: #242433;
+  --text: #f0f0f5;
+  --text-muted: #8888a0;
+  --accent: #7c6cff;
+  --accent-hover: #6d5ce0;
+  --success: #4ade80;
+  --warning: #fde68a;
+  --error: #f87171;
+  --radius: 12px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+.app {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 16px calc(24px + var(--safe-bottom));
+}
+
+/* Header */
+.app-header {
+  padding: 20px 0 12px;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+  border-bottom: 1px solid var(--surface-2);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  font-size: 32px;
+}
+
+.logo h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.logo p {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Hero */
+.hero {
+  padding: 20px 0;
+}
+
+.hero p {
+  color: var(--text-muted);
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+.feature-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Song picker */
+.song-picker h2 {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.song-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.song-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+}
+
+.song-card:hover,
+.song-card:active {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.song-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.song-title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.difficulty {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 600;
+}
+
+.difficulty.beginner {
+  background: #14532d;
+  color: var(--success);
+}
+
+.difficulty.intermediate {
+  background: #422006;
+  color: #fbbf24;
+}
+
+.song-artist {
+  font-size: 13px;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.song-description {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.song-note-count {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Practice mode */
+.practice-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.practice-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.practice-title h2 {
+  font-size: 17px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.practice-title span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.progress-bar {
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.note-prompt {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.prompt-label {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.prompt-note {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--warning);
+}
+
+.prompt-finger {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.prompt-hint {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* Piano keyboard */
+.piano-container {
+  overflow-x: auto;
+  margin: 0 -16px 16px;
+  padding: 0 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.piano-keyboard {
+  display: block;
+  min-width: 100%;
+  height: auto;
+}
+
+.finger-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px;
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+
+.finger-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.finger-name {
+  font-weight: 600;
+}
+
+.finger-note {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Mic status */
+.mic-status {
+  margin-bottom: 16px;
+}
+
+.volume-meter {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.volume-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.05s linear;
+}
+
+.mic-info {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.mic-info strong {
+  color: var(--text);
+}
+
+.match-badge {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+/* Camera */
+.camera-view {
+  margin-top: 20px;
+  border-top: 1px solid var(--surface-2);
+  padding-top: 16px;
+}
+
+.camera-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.camera-frame {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  aspect-ratio: 16 / 9;
+}
+
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.camera-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  gap: 8px;
+}
+
+.camera-placeholder .hint {
+  font-size: 12px;
+}
+
+.camera-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.guide-line {
+  position: absolute;
+  background: rgba(124, 108, 255, 0.6);
+}
+
+.guide-line--center {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+}
+
+.overlay-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: white;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Complete screen */
+.complete-screen {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.complete-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.complete-screen h3 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.complete-screen p {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.complete-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-secondary,
+.btn-back,
+.btn-small,
+.btn-icon {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: var(--radius);
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-large {
+  width: 100%;
+  padding: 16px;
+  font-size: 17px;
+}
+
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 12px 24px;
+  font-size: 15px;
+}
+
+.btn-back {
+  background: transparent;
+  color: var(--accent);
+  font-size: 14px;
+  padding: 8px 0;
+  white-space: nowrap;
+}
+
+.btn-small {
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.btn-icon {
+  background: var(--surface);
+  font-size: 20px;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.btn-icon.active {
+  background: var(--accent);
+}
+
+.practice-actions {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.score-line {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.error-text {
+  color: var(--error);
+  font-size: 13px;
+  text-align: center;
+  margin: 8px 0;
+  padding: 8px;
+  background: rgba(248, 113, 113, 0.1);
+  border-radius: 8px;
+}
