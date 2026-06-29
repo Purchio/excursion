@@ -1,12 +1,22 @@
 import { useState } from 'react';
+import { CalibrationProvider, useCalibration } from './context/CalibrationContext';
 import { SONGS } from './data/songs';
+import { CalibrationWizard } from './components/calibration/CalibrationWizard';
 import { SongPicker } from './components/SongPicker';
 import { PracticeMode } from './components/PracticeMode';
 import type { Song } from './data/songs';
 import './styles/app.css';
 
-export function App() {
+type AppView = 'home' | 'practice' | 'calibrate';
+
+function AppContent() {
+  const [view, setView] = useState<AppView>('home');
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const { hasAudioCalibration, hasVisualCalibration } = useCalibration();
+
+  if (view === 'calibrate') {
+    return <CalibrationWizard onClose={() => setView('home')} />;
+  }
 
   return (
     <div className="app">
@@ -18,6 +28,13 @@ export function App() {
             <p>Learn songs on your baby grand</p>
           </div>
         </div>
+        <button
+          type="button"
+          className={`btn-calibrate ${hasAudioCalibration ? 'calibrated' : ''}`}
+          onClick={() => setView('calibrate')}
+        >
+          {hasAudioCalibration ? '✓ Calibrated' : 'Calibrate piano'}
+        </button>
       </header>
 
       <main>
@@ -33,14 +50,44 @@ export function App() {
               <ul className="feature-list">
                 <li>🎤 Microphone hears which key you press</li>
                 <li>🎹 On-screen keyboard shows where to play</li>
-                <li>📷 Optional camera view to watch your hands</li>
+                <li>📷 Camera overlay shows keys on your real piano</li>
                 <li>🎵 Muse piano intros included</li>
               </ul>
+              {!hasAudioCalibration && (
+                <div className="cal-banner">
+                  <p>
+                    <strong>Tip:</strong> Calibrate your piano first for much better note
+                    detection on your specific instrument.
+                  </p>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => setView('calibrate')}
+                  >
+                    Calibrate now
+                  </button>
+                </div>
+              )}
+              {hasAudioCalibration && (
+                <p className="cal-status-line">
+                  {hasVisualCalibration
+                    ? '✓ Audio & camera calibrated for your piano'
+                    : '✓ Audio calibrated — add camera map for key overlays'}
+                </p>
+              )}
             </section>
             <SongPicker songs={SONGS} onSelect={setSelectedSong} />
           </>
         )}
       </main>
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <CalibrationProvider>
+      <AppContent />
+    </CalibrationProvider>
   );
 }

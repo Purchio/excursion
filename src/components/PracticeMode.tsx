@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Song } from '../data/songs';
+import { useCalibration } from '../context/CalibrationContext';
 import { usePitchDetection } from '../hooks/usePitchDetection';
-import { midiToNote, notesMatch } from '../utils/noteUtils';
-import { CameraView } from './CameraView';
+import { notesMatchCalibrated } from '../utils/calibratedPitch';
+import { midiToNote } from '../utils/noteUtils';
+import { CalibratedCameraView } from './CalibratedCameraView';
 import { PianoKeyboard } from './PianoKeyboard';
 
 interface PracticeModeProps {
@@ -13,6 +15,7 @@ interface PracticeModeProps {
 type PracticeState = 'ready' | 'waiting' | 'correct' | 'complete';
 
 export function PracticeMode({ song, onBack }: PracticeModeProps) {
+  const { calibration, hasAudioCalibration } = useCalibration();
   const [noteIndex, setNoteIndex] = useState(0);
   const [practiceState, setPracticeState] = useState<PracticeState>('ready');
   const [showCamera, setShowCamera] = useState(false);
@@ -32,6 +35,7 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
 
   const currentNote = song.notes[noteIndex];
   const progress = noteIndex / song.notes.length;
+  const audioKeys = calibration?.audioKeys ?? [];
 
   const advanceNote = useCallback(() => {
     setPracticeState('correct');
@@ -51,7 +55,7 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
   useEffect(() => {
     if (practiceState !== 'waiting' || !isListening || !currentNote) return;
 
-    if (notesMatch(detectedMidi, currentNote.midi)) {
+    if (notesMatchCalibrated(detectedMidi, currentNote.midi, audioKeys)) {
       if (holdStartRef.current === 0) {
         holdStartRef.current = Date.now();
       } else if (Date.now() - holdStartRef.current > 200) {
@@ -60,7 +64,7 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
     } else {
       holdStartRef.current = 0;
     }
-  }, [detectedMidi, currentNote, practiceState, isListening, advanceNote]);
+  }, [detectedMidi, currentNote, practiceState, isListening, advanceNote, audioKeys]);
 
   useEffect(() => {
     return () => clearTimeout(correctTimeoutRef.current);
@@ -129,8 +133,9 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
               <>
                 <p className="prompt-label">Ready to learn?</p>
                 <p className="prompt-hint">
-                  Place your iPad where the mic can hear the piano. Tap Start and play each
-                  highlighted note.
+                  {hasAudioCalibration
+                    ? 'Using your calibrated piano profile. Play each highlighted note.'
+                    : 'Place your iPad where the mic can hear the piano. Calibrating first improves accuracy.'}
                 </p>
               </>
             ) : (
@@ -169,7 +174,7 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
                 detectedNote ? (
                   <span>
                     Hearing: <strong>{detectedNote}</strong>
-                    {notesMatch(detectedMidi, currentNote?.midi ?? -1) && (
+                    {notesMatchCalibrated(detectedMidi, currentNote?.midi ?? -1, audioKeys) && (
                       <span className="match-badge"> ✓ match</span>
                     )}
                   </span>
@@ -204,7 +209,11 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
         </>
       )}
 
-      <CameraView enabled={showCamera} />
+      <CalibratedCameraView
+        enabled={showCamera}
+        highlightedMidi={practiceState === 'waiting' ? currentNote?.midi : null}
+        detectedMidi={detectedMidi}
+      />
     </div>
   );
 }

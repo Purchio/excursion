@@ -5,10 +5,22 @@ Learn to play your baby grand piano using your iPhone or iPad. Piano Coach liste
 ## Features
 
 - **Microphone note detection** — hears which key you press and confirms you're on the right note
-- **Guided practice** — highlights the next key and tells you which finger to use
-- **Song library** — beginner classics plus Muse piano intros (Madness, Space Dementia)
-- **Camera view** — optional overhead camera to watch your hands while you play
-- **Installable PWA** — add to your iPhone/iPad home screen for a full-screen app experience
+- **Piano calibration (Phase A)** — one-time audio walkthrough: play white keys then black keys; saved permanently on your device
+- **Camera keyboard map (Phase B)** — photo + tap your keyboard edges; overlays show which real key to play
+- **Guided practice mode** — highlights the next key, shows finger numbers, advances on correct input
+- **Song library** — Twinkle Twinkle, Ode to Joy, plus simplified Muse piano intros (Madness, Space Dementia)
+- **Installable PWA** — add to iPhone/iPad home screen for a native-like experience
+
+## Calibrate your piano (recommended)
+
+Before your first practice session:
+
+1. Tap **Calibrate piano** on the home screen
+2. **Audio (Step 1):** Play each white key left to right, then each black key. The mic records your piano's exact pitch for each key.
+3. **Camera (Step 2):** Capture a photo looking down at the keys, tap the leftmost and rightmost keys, then the front edge. Select which notes they are.
+4. Tap **Save** — calibration persists in your browser's local storage on that iPad/iPhone.
+
+After calibration, note detection uses your piano's tuning instead of generic pitch tables, and the camera view shows glowing dots on your real keys during practice.
 
 ## Quick start
 
@@ -27,11 +39,12 @@ Open the local URL on your iPhone or iPad (same Wi‑Fi network). For microphone
 
 ## How to practice
 
-1. Place your iPad or iPhone where the microphone can hear the piano (on the music desk works well)
-2. Choose a song — start with *Twinkle Twinkle* if you're brand new
-3. Tap **Start practice**
-4. Play each highlighted note; the app turns green when you're correct
-5. Optionally enable the camera (📷) to see your hands from above
+1. **Calibrate your piano** first (one-time, ~2 minutes)
+2. Place your iPad or iPhone where the microphone can hear the piano (on the music desk works well)
+3. Choose a song — start with *Twinkle Twinkle* if you're brand new
+4. Tap **Start practice**
+5. Play each highlighted note; the app turns green when you're correct
+6. Enable the camera (📷) to see glowing dots on your real keys (after camera calibration)
 
 ## Tech stack
 
@@ -40,10 +53,10 @@ Open the local URL on your iPhone or iPad (same Wi‑Fi network). For microphone
 - MediaDevices API for microphone and rear camera
 - PWA via vite-plugin-pwa
 
-## Limitations (v0.1)
+## Limitations (v0.2)
 
-- **Microphone-based detection** works best in a quiet room, close to the piano
-- **Camera finger tracking** is not yet implemented — the camera is a visual aid only; v2 could add ML-based key detection
+- **Microphone-based detection** works best in a quiet room, close to the piano; calibration improves accuracy significantly
+- **Camera map** uses geometric key layout from your taps — very accurate for overhead views, less so if the angle is steep
 - **Song catalog** is hand-authored simplified arrangements, not full transcriptions
 - **iOS requires HTTPS** for mic/camera in production (localhost works for dev)
 
@@ -52,8 +65,8 @@ Open the local URL on your iPhone or iPad (same Wi‑Fi network). For microphone
 - [ ] Import MIDI files for any song
 - [ ] Left-hand / both-hands modes
 - [ ] Metronome and tempo control
-- [ ] ML camera overlay to detect which physical key is pressed
-- [ ] Spaced repetition for tricky passages
+- [x] Audio calibration wizard
+- [x] Camera keyboard map with key overlays
 
 ## License
 
