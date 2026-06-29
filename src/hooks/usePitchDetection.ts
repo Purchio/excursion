@@ -1,23 +1,31 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCalibration } from '../context/CalibrationContext';
 import { detectPitch } from '../utils/pitchDetection';
-import { frequencyToMidi } from '../utils/noteUtils';
+import { frequencyToCalibratedMidi } from '../utils/calibratedPitch';
+import { frequencyToMidi, midiToNote } from '../utils/noteUtils';
 
 interface UsePitchDetectionResult {
   isListening: boolean;
   detectedMidi: number | null;
   detectedNote: string | null;
+  rawFrequency: number | null;
   volume: number;
   error: string | null;
   startListening: () => Promise<void>;
   stopListening: () => void;
+  frequencySamples: number[];
+  clearSamples: () => void;
 }
 
 export function usePitchDetection(): UsePitchDetectionResult {
+  const { calibration } = useCalibration();
   const [isListening, setIsListening] = useState(false);
   const [detectedMidi, setDetectedMidi] = useState<number | null>(null);
   const [detectedNote, setDetectedNote] = useState<string | null>(null);
+  const [rawFrequency, setRawFrequency] = useState<number | null>(null);
   const [volume, setVolume] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [frequencySamples, setFrequencySamples] = useState<number[]>([]);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -41,20 +49,28 @@ export function usePitchDetection(): UsePitchDetectionResult {
 
     const frequency = detectPitch(buffer, analyser.context.sampleRate);
     if (frequency) {
-      const midi = frequencyToMidi(frequency);
+      setRawFrequency(frequency);
+      const audioKeys = calibration?.audioKeys ?? [];
+      const midi =
+        audioKeys.length > 0
+          ? frequencyToCalibratedMidi(frequency, audioKeys)
+          : frequencyToMidi(frequency);
+
       if (midi !== null) {
-        const octave = Math.floor(midi / 12) - 1;
-        const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         setDetectedMidi(midi);
-        setDetectedNote(`${names[midi % 12]}${octave}`);
+        setDetectedNote(midiToNote(midi));
+        if (rms > 0.02) {
+          setFrequencySamples((prev) => [...prev.slice(-30), frequency]);
+        }
       }
     } else {
+      setRawFrequency(null);
       setDetectedMidi(null);
       setDetectedNote(null);
     }
 
     rafRef.current = requestAnimationFrame(analyze);
-  }, []);
+  }, [calibration?.audioKeys]);
 
   const stopListening = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
@@ -66,11 +82,17 @@ export function usePitchDetection(): UsePitchDetectionResult {
     setIsListening(false);
     setDetectedMidi(null);
     setDetectedNote(null);
+    setRawFrequency(null);
     setVolume(0);
+  }, []);
+
+  const clearSamples = useCallback(() => {
+    setFrequencySamples([]);
   }, []);
 
   const startListening = useCallback(async () => {
     setError(null);
+    clearSamples();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -101,7 +123,7 @@ export function usePitchDetection(): UsePitchDetectionResult {
           : 'Microphone access denied. Please allow mic access in Settings.',
       );
     }
-  }, [analyze]);
+  }, [analyze, clearSamples]);
 
   useEffect(() => {
     return () => stopListening();
@@ -111,9 +133,12 @@ export function usePitchDetection(): UsePitchDetectionResult {
     isListening,
     detectedMidi,
     detectedNote,
+    rawFrequency,
     volume,
     error,
     startListening,
     stopListening,
+    frequencySamples,
+    clearSamples,
   };
 }

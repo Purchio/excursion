@@ -6,6 +6,7 @@ interface UseCameraResult {
   error: string | null;
   startCamera: () => Promise<void>;
   stopCamera: () => void;
+  captureFrame: () => string | null;
 }
 
 export function useCamera(): UseCameraResult {
@@ -49,9 +50,22 @@ export function useCamera(): UseCameraResult {
     }
   }, []);
 
+  const captureFrame = useCallback((): string | null => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) return null;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    ctx.drawImage(video, 0, 0);
+    return canvas.toDataURL('image/jpeg', 0.85);
+  }, []);
+
   useEffect(() => {
     return () => stopCamera();
   }, [stopCamera]);
 
-  return { isActive, videoRef, error, startCamera, stopCamera };
+  return { isActive, videoRef, error, startCamera, stopCamera, captureFrame };
 }
