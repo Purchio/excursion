@@ -62,12 +62,19 @@ export function averageStableFrequency(samples: number[]): number | null {
   return trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
 }
 
-export function isFrequencyStable(samples: number[], maxCentsDrift = 30): boolean {
-  if (samples.length < 8) return false;
-  const recent = samples.slice(-12);
+export function isFrequencyStable(samples: number[], maxCentsDrift = 45, minSamples = 5): boolean {
+  if (samples.length < minSamples) return false;
+  const recent = samples.slice(-10);
   const logSamples = recent.map((f) => Math.log2(f));
   const mean = logSamples.reduce((a, b) => a + b, 0) / logSamples.length;
   const maxDrift = Math.max(...logSamples.map((l) => Math.abs(l - mean)));
   const centsDrift = maxDrift * 1200 / Math.LN2;
   return centsDrift < maxCentsDrift;
+}
+
+export function captureFrequency(samples: number[], rawFrequency: number | null): number | null {
+  const avg = averageStableFrequency(samples);
+  if (avg) return avg;
+  if (rawFrequency && rawFrequency > 27) return rawFrequency;
+  return null;
 }

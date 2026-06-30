@@ -1,5 +1,5 @@
-const MIN_FREQUENCY = 60;
-const MIN_VOLUME = 0.015;
+const MIN_FREQUENCY = 55;
+const MIN_VOLUME = 0.006;
 
 export function detectPitch(buffer: Float32Array, sampleRate: number): number | null {
   const rms = getRms(buffer);

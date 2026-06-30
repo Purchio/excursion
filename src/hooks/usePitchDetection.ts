@@ -59,7 +59,7 @@ export function usePitchDetection(): UsePitchDetectionResult {
       if (midi !== null) {
         setDetectedMidi(midi);
         setDetectedNote(midiToNote(midi));
-        if (rms > 0.02) {
+        if (rms > 0.006) {
           setFrequencySamples((prev) => [...prev.slice(-30), frequency]);
         }
       }

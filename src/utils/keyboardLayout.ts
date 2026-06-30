@@ -49,8 +49,10 @@ export function suggestNoteRange(startMidi: number, endMidi: number): string {
   return `${midiToNote(startMidi)} – ${midiToNote(endMidi)}`;
 }
 
-export const CALIBRATION_OCTAVE_START = 48; // C3
-export const CALIBRATION_OCTAVE_END = 72; // C5
+export const CALIBRATION_OCTAVE_START = 60; // C4 — middle C octave (easier to find)
+export const CALIBRATION_OCTAVE_END = 71; // B4
+export const FULL_KEYBOARD_START = 36; // C2
+export const FULL_KEYBOARD_END = 84; // C6 — typical upright range
 
 export function getCalibrationKeySequence(startMidi: number, endMidi: number): number[] {
   const keys: number[] = [];

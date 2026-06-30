@@ -258,11 +258,35 @@ body {
 }
 
 /* Piano keyboard */
+.piano-wrapper {
+  margin-bottom: 12px;
+}
+
+.piano-wrapper--full {
+  margin: 0 -16px 16px;
+}
+
+.piano-position-hint {
+  font-size: 14px;
+  color: var(--warning);
+  text-align: center;
+  margin-bottom: 10px;
+  padding: 0 16px;
+  line-height: 1.4;
+}
+
 .piano-container {
   overflow-x: auto;
-  margin: 0 -16px 16px;
   padding: 0 16px;
   -webkit-overflow-scrolling: touch;
+}
+
+.piano-container--full {
+  max-height: 160px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 8px 12px;
 }
 
 .piano-keyboard {
@@ -902,6 +926,55 @@ body {
 .permission-desc--small {
   font-size: 12px;
   margin-bottom: 16px;
+}
+
+.detection-debug {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.volume-meter--large {
+  height: 10px;
+  margin-bottom: 10px;
+}
+
+.debug-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.debug-label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.debug-ok {
+  color: var(--success);
+}
+
+.debug-warn {
+  color: var(--warning);
+}
+
+.debug-freq {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  text-align: center;
+}
+
+.cal-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 8px;
 }
 
 .no-audio-notice {

@@ -3,9 +3,11 @@ import type { Song } from '../data/songs';
 import { useCalibration } from '../context/CalibrationContext';
 import { usePitchDetection } from '../hooks/usePitchDetection';
 import { notesMatchCalibrated } from '../utils/calibratedPitch';
+import { FULL_KEYBOARD_END, FULL_KEYBOARD_START } from '../utils/keyboardLayout';
 import { queryMicPermission } from '../utils/deviceUtils';
 import { midiToNote } from '../utils/noteUtils';
 import { CalibratedCameraView } from './CalibratedCameraView';
+import { DetectionDebug } from './DetectionDebug';
 import { MicPermissionHelp } from './MicPermissionHelp';
 import { PianoKeyboard } from './PianoKeyboard';
 
@@ -31,6 +33,7 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
     detectedMidi,
     detectedNote,
     volume,
+    rawFrequency,
     error: micError,
     startListening,
     stopListening,
@@ -176,32 +179,19 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
                 pressedMidi={detectedMidi}
                 correctMidi={isCorrect ? currentNote?.midi : null}
                 showFinger={currentNote?.finger}
+                showFullKeyboard
+                fullRangeStart={FULL_KEYBOARD_START}
+                fullRangeEnd={FULL_KEYBOARD_END}
               />
 
-              <div className="mic-status">
-                <div className="volume-meter">
-                  <div
-                    className="volume-fill"
-                    style={{ width: `${Math.min(volume * 400, 100)}%` }}
-                  />
-                </div>
-                <div className="mic-info">
-                  {isListening ? (
-                    detectedNote ? (
-                      <span>
-                        Hearing: <strong>{detectedNote}</strong>
-                        {notesMatchCalibrated(detectedMidi, currentNote?.midi ?? -1, audioKeys) && (
-                          <span className="match-badge"> ✓ match</span>
-                        )}
-                      </span>
-                    ) : (
-                      <span className="muted">Play a note on your piano…</span>
-                    )
-                  ) : (
-                    <span className="muted">Microphone off</span>
-                  )}
-                </div>
-              </div>
+              <DetectionDebug
+                volume={volume}
+                detectedNote={detectedNote}
+                detectedMidi={detectedMidi}
+                expectedMidi={currentNote?.midi ?? null}
+                rawFrequency={rawFrequency}
+                sampleCount={0}
+              />
             </>
           )}
 
