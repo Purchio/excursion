@@ -8,6 +8,7 @@ import { queryMicPermission } from '../utils/deviceUtils';
 import { midiToNote } from '../utils/noteUtils';
 import { CalibratedCameraView } from './CalibratedCameraView';
 import { DetectionDebug } from './DetectionDebug';
+import { KeyMatchBanner } from './KeyMatchBanner';
 import { MicPermissionHelp } from './MicPermissionHelp';
 import { PianoKeyboard } from './PianoKeyboard';
 
@@ -182,6 +183,13 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
                 showFullKeyboard
                 fullRangeStart={FULL_KEYBOARD_START}
                 fullRangeEnd={FULL_KEYBOARD_END}
+              />
+
+              <KeyMatchBanner
+                expectedMidi={currentNote?.midi ?? null}
+                detectedMidi={detectedMidi}
+                detectedNote={detectedNote}
+                volume={volume}
               />
 
               <DetectionDebug

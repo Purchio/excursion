@@ -16,6 +16,7 @@ import {
 } from '../../utils/keyboardLayout';
 import { midiToNote } from '../../utils/noteUtils';
 import { DetectionDebug } from '../DetectionDebug';
+import { KeyMatchBanner } from '../KeyMatchBanner';
 import { PianoKeyboard } from '../PianoKeyboard';
 
 interface AudioCalibrationStepProps {
@@ -33,6 +34,7 @@ export function AudioCalibrationStep({ onComplete, onBack }: AudioCalibrationSte
   );
   const [keyIndex, setKeyIndex] = useState(0);
   const [status, setStatus] = useState<'idle' | 'listening' | 'captured'>('idle');
+  const [captureError, setCaptureError] = useState<string | null>(null);
 
   const whiteKeys = getWhiteKeySequence(CALIBRATION_OCTAVE_START, CALIBRATION_OCTAVE_END);
   const blackKeys = getBlackKeySequence(CALIBRATION_OCTAVE_START, CALIBRATION_OCTAVE_END);
@@ -80,6 +82,7 @@ export function AudioCalibrationStep({ onComplete, onBack }: AudioCalibrationSte
       if (keyIndex + 1 < currentSequence.length) {
         setKeyIndex((i) => i + 1);
         setStatus('listening');
+        setCaptureError(null);
       } else if (phase === 'whites') {
         setPhase('blacks');
         setKeyIndex(0);
@@ -100,15 +103,37 @@ export function AudioCalibrationStep({ onComplete, onBack }: AudioCalibrationSte
   };
 
   const handleManualCapture = () => {
-    const ok = captureKey();
-    if (!ok && rawFrequency) {
-      setRecordedKeys((prev) => {
-        const filtered = prev.filter((k) => k.midi !== currentMidi);
-        return [...filtered, { midi: currentMidi!, frequency: rawFrequency }];
-      });
-      setStatus('captured');
-      clearSamples();
+    setCaptureError(null);
+    if (!currentMidi) return;
+
+    if (volume < 0.004) {
+      setCaptureError(
+        'Mic hears nothing. Play the key firmly, check the volume bar moves, and try again.',
+      );
+      return;
     }
+
+    const freq = captureFrequency(frequencySamples, rawFrequency);
+    if (!freq) {
+      setCaptureError(
+        'Could not detect a clear note. Play the key and tap Save this key while it still rings.',
+      );
+      return;
+    }
+
+    if (detectedMidi !== null && Math.abs(detectedMidi - currentMidi) > 1) {
+      setCaptureError(
+        `Wrong key: app hears ${midiToNote(detectedMidi)} but you need ${midiToNote(currentMidi)}. Find the yellow key on the keyboard below.`,
+      );
+      return;
+    }
+
+    setRecordedKeys((prev) => {
+      const filtered = prev.filter((k) => k.midi !== currentMidi);
+      return [...filtered, { midi: currentMidi, frequency: freq }];
+    });
+    setStatus('captured');
+    clearSamples();
   };
 
   const handleSkip = () => {
@@ -168,10 +193,17 @@ export function AudioCalibrationStep({ onComplete, onBack }: AudioCalibrationSte
     <div className="cal-step">
       <h2>Audio calibration</h2>
       <p className="cal-desc">
-        Middle C octave on your piano. Play each <strong>yellow</strong> key — count white keys
-        from the left using the full keyboard below. Hold the iPad on the music desk, 12–18
-        inches back (not right on the keys).
+        For each key: find the <strong>yellow</strong> key on the keyboard below, play it on
+        your Knabe, wait until the banner says <strong>Right key!</strong>, then tap{' '}
+        <strong>Save this key</strong>. iPad on the music desk, 12–18 inches back.
       </p>
+
+      <ol className="cal-steps">
+        <li>Find the yellow key (count white keys from the left)</li>
+        <li>Play that key on your piano</li>
+        <li>Wait for green &ldquo;Right key!&rdquo; banner</li>
+        <li>Tap <strong>Save this key</strong></li>
+      </ol>
 
       <div className="cal-phase-badge">
         {phase === 'whites' ? 'White keys' : 'Black keys'} — {keyIndex + 1} of{' '}
@@ -208,6 +240,13 @@ export function AudioCalibrationStep({ onComplete, onBack }: AudioCalibrationSte
             fullRangeEnd={FULL_KEYBOARD_END}
           />
 
+          <KeyMatchBanner
+            expectedMidi={currentMidi ?? null}
+            detectedMidi={detectedMidi}
+            detectedNote={detectedNote}
+            volume={volume}
+          />
+
           <DetectionDebug
             volume={volume}
             detectedNote={detectedNote}
@@ -221,13 +260,11 @@ export function AudioCalibrationStep({ onComplete, onBack }: AudioCalibrationSte
             <button type="button" className="btn-secondary" onClick={handleSkip}>
               Skip key
             </button>
-            <button type="button" className="btn-primary" onClick={handleManualCapture}>
-              Capture now
+            <button type="button" className="btn-primary btn-large" onClick={handleManualCapture}>
+              Save this key
             </button>
           </div>
-          <p className="cal-hint">
-            Auto-capture slow? Play the key, wait 1 second, tap <strong>Capture now</strong>.
-          </p>
+          {captureError && <p className="error-text">{captureError}</p>}
         </>
       )}
 

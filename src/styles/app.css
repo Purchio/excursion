@@ -977,6 +977,63 @@ body {
   margin-top: 8px;
 }
 
+.cal-steps {
+  margin: 0 0 16px 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.cal-steps strong {
+  color: var(--text);
+}
+
+.match-banner {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.match-banner p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.match-banner-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.match-banner--waiting {
+  background: var(--surface);
+  border: 1px solid var(--surface-2);
+}
+
+.match-banner--yes {
+  background: rgba(74, 222, 128, 0.15);
+  border: 2px solid var(--success);
+  color: var(--success);
+}
+
+.match-banner--yes strong {
+  color: var(--success);
+}
+
+.match-banner--no {
+  background: rgba(248, 113, 113, 0.12);
+  border: 2px solid var(--error);
+}
+
+.match-banner--no strong {
+  color: var(--error);
+}
+
 .no-audio-notice {
   background: rgba(124, 108, 255, 0.15);
   border: 1px solid var(--accent);
