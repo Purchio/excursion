@@ -38,7 +38,7 @@ export function MicPermissionHelp({
           {fromHomeScreen && (
             <p className="permission-desc permission-desc--small">
               Tip: If it still fails from the home screen icon, open{' '}
-              <strong>piano-coach.vercel.app</strong> in Safari directly, allow the mic there,
+              <strong>purchio.github.io/excursion</strong> in Safari directly, allow the mic there,
               then try the home screen icon again.
             </p>
           )}
@@ -48,7 +48,7 @@ export function MicPermissionHelp({
       {fromHomeScreen && permissionState !== 'denied' && (
         <p className="permission-desc permission-desc--small">
           Opened from home screen? If no popup appears, try opening{' '}
-          <strong>piano-coach.vercel.app</strong> in Safari first and tap Allow when asked.
+          <strong>purchio.github.io/excursion</strong> in Safari first and tap Allow when asked.
         </p>
       )}
 

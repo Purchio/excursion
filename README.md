@@ -26,15 +26,17 @@ After calibration, note detection uses your piano's tuning instead of generic pi
 
 ## Use on your iPad
 
-**https://piano-coach.vercel.app/**
+**https://purchio.github.io/excursion/**
 
-Same URL as your laptop. Open it in **Safari** on your iPad, then:
+Open in **Safari**, then:
 
 1. Tap **Share → Add to Home Screen**
-2. Tap **Calibrate piano** (top right) before your first session
-3. Pick a song → **Enable microphone & start** → tap **Allow** when Safari asks
+2. Tap **Calibrate piano** (top right)
+3. Pick a song → **Enable microphone & start** → tap **Allow**
 
-The app listens to your piano through the mic — it does not play song audio through the iPad speakers.
+The app listens to your piano — it does not play song audio through the iPad.
+
+> **Note:** `piano-coach.vercel.app` is a different app (MIDI library). This repo deploys to the GitHub Pages URL above.
 
 ## Local development (Mac only)
 
