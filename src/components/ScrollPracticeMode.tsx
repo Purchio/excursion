@@ -17,6 +17,13 @@ import { MicPermissionHelp } from './MicPermissionHelp';
 import { PianoKeyboard } from './PianoKeyboard';
 import { ScrollMicBanner } from './ScrollMicBanner';
 import { queryMicPermission } from '../utils/deviceUtils';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Camera, ChevronLeft } from 'lucide-react';
 
 interface ScrollPracticeModeProps {
   song: TimedSong;
@@ -120,48 +127,47 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
   const leadLine = formatLeadNotesLine(leadAtHit);
 
   return (
-    <div className="practice-mode scroll-practice">
-      <header className="practice-header">
-        <button type="button" className="btn-back" onClick={onBack}>
-          ← Songs
-        </button>
-        <div className="practice-title">
-          <h2>{song.title}</h2>
-          <span>{song.artist}</span>
+    <div className="practice-mode scroll-practice space-y-4">
+      <header className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          <ChevronLeft className="h-4 w-4" />
+          Songs
+        </Button>
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-lg font-semibold">{song.title}</h2>
+          <p className="truncate text-sm text-muted-foreground">{song.artist}</p>
         </div>
-        <button
-          type="button"
-          className={`btn-icon ${showCamera ? 'active' : ''}`}
+        <Button
+          variant={showCamera ? 'secondary' : 'outline'}
+          size="icon"
           onClick={() => setShowCamera((v) => !v)}
           title="Toggle camera"
         >
-          📷
-        </button>
+          <Camera className="h-4 w-4" />
+        </Button>
       </header>
 
-      <div className="scroll-toolbar">
-        <span className="mode-badge">Scroll mode</span>
+      <div className="flex flex-wrap items-center gap-3">
+        <Badge>Scroll mode</Badge>
         {onSwitchToGuided && (
-          <button type="button" className="btn-text" onClick={onSwitchToGuided}>
+          <Button variant="link" size="sm" className="h-auto p-0" onClick={onSwitchToGuided}>
             Switch to guided
-          </button>
+          </Button>
         )}
-        <label className="toggle-mic" title="Mutes speaker audio while on — mic only hears your piano">
-          <input
-            type="checkbox"
-            checked={micEnabled}
-            onChange={(e) => setMicEnabled(e.target.checked)}
-          />
-          Mic verify
-        </label>
+        <div className="ml-auto flex items-center gap-2">
+          <Switch id="mic-verify" checked={micEnabled} onCheckedChange={setMicEnabled} />
+          <Label htmlFor="mic-verify" className="text-sm text-muted-foreground">
+            Mic verify
+          </Label>
+        </div>
       </div>
 
-      <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${progress * 100}%` }} />
+      <div className="space-y-1">
+        <Progress value={progress * 100} className="h-1.5" />
+        <p className="text-center text-xs text-muted-foreground">
+          {formatDuration(currentTimeMs)} / {formatDuration(song.durationMs)}
+        </p>
       </div>
-      <p className="time-line">
-        {formatDuration(currentTimeMs)} / {formatDuration(song.durationMs)}
-      </p>
 
       <FallingNotes
         notes={song.notes}
@@ -170,23 +176,17 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
       />
 
       {!isPlaying && currentTimeMs === 0 ? (
-        <div className="note-prompt">
-          <p className="prompt-label">Falling notes + playback</p>
-          <p className="prompt-hint">
-            Blue = right hand, red = left. Numbers = fingers.
-            {micEnabled
-              ? ' Mic verify is on — speaker audio mutes so the iPad only hears your piano.'
-              : ' Turn on Mic verify to check keys on your real piano (speaker mutes automatically).'}
-          </p>
-          {micEnabled && (
-            <MicPermissionHelp
-              onRequestMic={handleStart}
-              isListening={isListening}
-              error={micError}
-              permissionState={micPermission}
-            />
-          )}
-        </div>
+        <Alert>
+          <AlertDescription>
+            <p className="font-medium text-foreground">Falling notes + playback</p>
+            <p className="mt-1 text-sm">
+              Blue = right hand, red = left. Numbers = fingers.
+              {micEnabled
+                ? ' Mic verify is on — speaker audio mutes so the iPad only hears your piano.'
+                : ' Turn on Mic verify to check keys on your real piano.'}
+            </p>
+          </AlertDescription>
+        </Alert>
       ) : (
         <>
           <PianoKeyboard
@@ -202,7 +202,6 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
           {micEnabled && (
             <ScrollMicBanner
               leadNotes={leadAtHit}
-              detectedMidi={detectedMidi}
               detectedNote={detectedNote}
               volume={volume}
               matchedNote={matchedNote}
@@ -210,51 +209,66 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
           )}
 
           {leadLine && (
-            <p className="active-notes-line">
+            <p className="text-center text-sm text-amber-200/90">
               {micEnabled ? 'Target: ' : 'Now: '}{leadLine}
             </p>
           )}
         </>
       )}
 
-      <div className="playback-controls">
+      {micEnabled && !isPlaying && currentTimeMs === 0 && (
+        <MicPermissionHelp
+          onRequestMic={handleStart}
+          isListening={isListening}
+          error={micError}
+          permissionState={micPermission}
+        />
+      )}
+
+      <div className="flex flex-wrap items-center gap-2">
         {!isPlaying && currentTimeMs === 0 ? (
-          <button type="button" className="btn-primary btn-large" onClick={handleStart}>
+          <Button className="flex-1" size="lg" onClick={handleStart}>
             {micEnabled ? 'Start (mic on, audio muted)' : 'Start playback'}
-          </button>
+          </Button>
         ) : isPlaying ? (
-          <button type="button" className="btn-secondary" onClick={handlePause}>
+          <Button variant="secondary" onClick={handlePause}>
             Pause
-          </button>
+          </Button>
         ) : (
-          <button type="button" className="btn-primary" onClick={handleResume}>
-            Resume
-          </button>
+          <Button onClick={handleResume}>Resume</Button>
         )}
         {(isPlaying || currentTimeMs > 0) && (
-          <button type="button" className="btn-secondary" onClick={handleStop}>
+          <Button variant="outline" onClick={handleStop}>
             Stop
-          </button>
+          </Button>
         )}
-        <label className="speed-control">
-          Speed
+        <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
+          <Label htmlFor="speed">Speed</Label>
           <select
+            id="speed"
             value={speed}
             onChange={(e) => setSpeed(Number(e.target.value))}
+            className="rounded-md border border-input bg-background px-2 py-1 text-sm"
           >
             <option value={0.5}>0.5×</option>
             <option value={0.75}>0.75×</option>
             <option value={1}>1×</option>
             <option value={1.25}>1.25×</option>
           </select>
-        </label>
+        </div>
       </div>
 
       {micEnabled && isPlaying && (
-        <p className="score-line">{hitCount} notes verified on your piano</p>
+        <p className="text-center text-sm text-muted-foreground">
+          {hitCount} notes verified on your piano
+        </p>
       )}
 
-      {micError && <p className="error-text">{micError}</p>}
+      {micError && (
+        <Alert variant="destructive">
+          <AlertDescription>{micError}</AlertDescription>
+        </Alert>
+      )}
 
       <CalibratedCameraView
         enabled={showCamera}

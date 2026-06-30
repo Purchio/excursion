@@ -1,12 +1,15 @@
 import { useState } from 'react';
+import { Piano, CheckCircle2 } from 'lucide-react';
 import { CalibrationProvider, useCalibration } from './context/CalibrationContext';
 import { getAllBuiltinSongs, loadMidiSong } from './data/songLibrary';
 import { CalibrationWizard } from './components/calibration/CalibrationWizard';
 import { OnboardingBanner } from './components/OnboardingBanner';
 import { SongPicker } from './components/SongPicker';
 import { UnifiedPractice } from './components/UnifiedPractice';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { TimedSong } from './types/song';
-import './styles/app.css';
 
 type AppView = 'home' | 'practice' | 'calibrate';
 
@@ -35,66 +38,79 @@ function AppContent() {
   }
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="logo">
-          <span className="logo-icon">🎹</span>
+    <div className="app mx-auto max-w-xl px-4 pb-6">
+      <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background py-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+            <Piano className="h-5 w-5" />
+          </div>
           <div>
-            <h1>Super Piano Coach</h1>
-            <p>Falling notes · fingers · mic verify</p>
+            <h1 className="text-xl font-bold tracking-tight">Super Piano Coach</h1>
+            <p className="text-sm text-muted-foreground">Falling notes · fingers · mic verify</p>
           </div>
         </div>
-        <button
-          type="button"
-          className={`btn-calibrate ${hasAudioCalibration ? 'calibrated' : ''}`}
+        <Button
+          variant={hasAudioCalibration ? 'secondary' : 'default'}
+          size="sm"
           onClick={() => setView('calibrate')}
         >
-          {hasAudioCalibration ? '✓ Calibrated' : 'Calibrate piano'}
-        </button>
+          {hasAudioCalibration ? (
+            <>
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+              Calibrated
+            </>
+          ) : (
+            'Calibrate'
+          )}
+        </Button>
       </header>
 
-      <main>
+      <main className="pt-4">
         {selectedSong ? (
           <UnifiedPractice song={selectedSong} onBack={() => setSelectedSong(null)} />
         ) : (
           <>
             <OnboardingBanner />
-            <section className="hero">
-              <p>
+            <section className="mb-6 space-y-4">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 Learn on your real piano — falling notes show what to play, synthesized audio
                 plays along, and your iPhone mic verifies each key.
               </p>
-              <ul className="feature-list">
-                <li>🎵 Falling notes with left/right lanes and finger numbers</li>
-                <li>🔊 MIDI playback (synthesized piano)</li>
-                <li>🎤 Microphone hears which key you press</li>
-                <li>📂 Load MIDI files — Satisfaction bundled, import more anytime</li>
-                <li>📷 Camera overlay maps keys on your Knabe</li>
-              </ul>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary">Falling notes</Badge>
+                <Badge variant="secondary">MIDI playback</Badge>
+                <Badge variant="secondary">Mic verify</Badge>
+                <Badge variant="secondary">MIDI import</Badge>
+              </div>
               {!hasAudioCalibration && (
-                <div className="cal-banner">
-                  <p>
-                    <strong>Tip:</strong> Calibrate your piano first for much better note
-                    detection on your specific instrument.
-                  </p>
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => setView('calibrate')}
-                  >
-                    Calibrate now
-                  </button>
-                </div>
+                <Alert>
+                  <AlertDescription>
+                    <strong className="text-foreground">Tip:</strong> Calibrate your piano first for
+                    much better note detection on your Knabe.
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => setView('calibrate')}
+                    >
+                      Calibrate now
+                    </Button>
+                  </AlertDescription>
+                </Alert>
               )}
               {hasAudioCalibration && (
-                <p className="cal-status-line">
+                <p className="text-sm text-emerald-400">
                   {hasVisualCalibration
                     ? '✓ Audio & camera calibrated for your piano'
                     : '✓ Audio calibrated — add camera map for key overlays'}
                 </p>
               )}
             </section>
-            {loadError && <p className="error-text">{loadError}</p>}
+            {loadError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{loadError}</AlertDescription>
+              </Alert>
+            )}
             <SongPicker
               songs={getAllBuiltinSongs()}
               onSelect={setSelectedSong}

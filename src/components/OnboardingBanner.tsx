@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const DISMISS_KEY = 'piano-coach-onboarding-dismissed';
 
@@ -15,27 +18,28 @@ export function OnboardingBanner() {
   };
 
   return (
-    <div className="onboarding-banner">
-      <h3>How this app works</h3>
-      <ul>
-        <li>
-          <strong>Your iPad does not play the song.</strong> You play your real piano; the iPad
-          microphone listens and checks each note.
-        </li>
-        <li>
-          Tap <strong>Start practice</strong> — Safari will ask to use the microphone. Tap{' '}
-          <strong>Allow</strong>.
-        </li>
-        <li>
-          Tap <strong>Calibrate piano</strong> first (top right) for much better note detection.
-        </li>
-        <li>
-          Camera permission is only asked when you tap 📷 or during camera calibration.
-        </li>
-      </ul>
-      <button type="button" className="btn-primary" onClick={handleDismiss}>
-        Got it
-      </button>
-    </div>
+    <Alert className="mb-4">
+      <Info className="h-4 w-4" />
+      <AlertTitle>How this app works</AlertTitle>
+      <AlertDescription>
+        <ul className="mt-2 list-disc space-y-1.5 pl-4">
+          <li>
+            <strong className="text-foreground">Your iPad does not play the song.</strong> You play
+            your real piano; the mic listens and checks each note.
+          </li>
+          <li>
+            Tap <strong className="text-foreground">Start</strong> — Safari will ask for the
+            microphone. Tap Allow.
+          </li>
+          <li>
+            Tap <strong className="text-foreground">Calibrate</strong> first for much better
+            detection on your Knabe.
+          </li>
+        </ul>
+        <Button size="sm" className="mt-3" onClick={handleDismiss}>
+          Got it
+        </Button>
+      </AlertDescription>
+    </Alert>
   );
 }

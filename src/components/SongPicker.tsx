@@ -1,8 +1,11 @@
-import { useState } from 'react';
 import type { TimedSong } from '../types/song';
 import { MIDI_CATALOG } from '../data/songLibrary';
 import { formatDuration } from '../utils/songUtils';
 import { MidiUpload } from './MidiUpload';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface SongPickerProps {
   songs: TimedSong[];
@@ -12,6 +15,64 @@ interface SongPickerProps {
   loadingMidiId?: string | null;
 }
 
+function difficultyVariant(difficulty: string): 'default' | 'secondary' | 'warning' {
+  if (difficulty === 'beginner') return 'secondary';
+  if (difficulty === 'advanced') return 'warning';
+  return 'default';
+}
+
+function SongCard({
+  title,
+  artist,
+  description,
+  meta,
+  badge,
+  badgeVariant = 'default',
+  onClick,
+  disabled,
+  dashed,
+}: {
+  title: string;
+  artist: string;
+  description: string;
+  meta: string;
+  badge: string;
+  badgeVariant?: 'default' | 'secondary' | 'warning';
+  onClick: () => void;
+  disabled?: boolean;
+  dashed?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="w-full text-left disabled:opacity-60"
+    >
+      <Card
+        className={cn(
+          'transition-colors hover:border-primary/50 hover:bg-accent/30',
+          dashed && 'border-dashed',
+        )}
+      >
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between gap-2">
+            <CardTitle className="text-base">{title}</CardTitle>
+            <Badge variant={badgeVariant}>{badge}</Badge>
+          </div>
+          <CardDescription className="text-xs font-medium text-muted-foreground/80">
+            {artist}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-xs text-muted-foreground">{meta}</p>
+        </CardContent>
+      </Card>
+    </button>
+  );
+}
+
 export function SongPicker({
   songs,
   onSelect,
@@ -19,79 +80,54 @@ export function SongPicker({
   onUpload,
   loadingMidiId,
 }: SongPickerProps) {
-  const [tab, setTab] = useState<'builtin' | 'midi'>('builtin');
-
   return (
-    <div className="song-picker">
-      <h2>Choose a song</h2>
-      <p className="subtitle">
-        Guided mode for beginners · Scroll mode with falling notes, fingers, and playback for everything else.
-      </p>
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Choose a song</h2>
+        <p className="text-sm text-muted-foreground">
+          Guided for beginners · Scroll with falling notes for everything else.
+        </p>
+      </div>
 
       <MidiUpload onLoaded={onUpload} />
 
-      <div className="song-tabs">
-        <button
-          type="button"
-          className={tab === 'builtin' ? 'active' : ''}
-          onClick={() => setTab('builtin')}
-        >
-          Built-in ({songs.length})
-        </button>
-        <button
-          type="button"
-          className={tab === 'midi' ? 'active' : ''}
-          onClick={() => setTab('midi')}
-        >
-          MIDI library ({MIDI_CATALOG.length})
-        </button>
-      </div>
+      <Tabs defaultValue="builtin">
+        <TabsList>
+          <TabsTrigger value="builtin">Built-in ({songs.length})</TabsTrigger>
+          <TabsTrigger value="midi">MIDI library ({MIDI_CATALOG.length})</TabsTrigger>
+        </TabsList>
 
-      {tab === 'builtin' ? (
-        <div className="song-list">
+        <TabsContent value="builtin" className="space-y-3">
           {songs.map((song) => (
-            <button
+            <SongCard
               key={song.id}
-              className="song-card"
+              title={song.title}
+              artist={song.artist}
+              description={song.description}
+              badge={song.difficulty}
+              badgeVariant={difficultyVariant(song.difficulty)}
+              meta={`${song.notes.length} notes · ${formatDuration(song.durationMs)} · ${song.defaultMode === 'scroll' ? 'scroll' : 'guided'}`}
               onClick={() => onSelect(song)}
-              type="button"
-            >
-              <div className="song-card-header">
-                <span className="song-title">{song.title}</span>
-                <span className={`difficulty ${song.difficulty}`}>{song.difficulty}</span>
-              </div>
-              <span className="song-artist">{song.artist}</span>
-              <p className="song-description">{song.description}</p>
-              <span className="song-note-count">
-                {song.notes.length} notes · {formatDuration(song.durationMs)}
-                {song.defaultMode === 'scroll' ? ' · scroll' : ' · guided'}
-              </span>
-            </button>
+            />
           ))}
-        </div>
-      ) : (
-        <div className="song-list">
+        </TabsContent>
+
+        <TabsContent value="midi" className="space-y-3">
           {MIDI_CATALOG.map((entry) => (
-            <button
+            <SongCard
               key={entry.id}
-              className="song-card song-card--midi"
-              onClick={() => onSelectMidi(entry.id)}
-              type="button"
+              title={entry.title}
+              artist={entry.artist}
+              description={entry.description}
+              badge="MIDI"
+              dashed
               disabled={loadingMidiId === entry.id}
-            >
-              <div className="song-card-header">
-                <span className="song-title">{entry.title}</span>
-                <span className="difficulty intermediate">MIDI</span>
-              </div>
-              <span className="song-artist">{entry.artist}</span>
-              <p className="song-description">{entry.description}</p>
-              <span className="song-note-count">
-                {loadingMidiId === entry.id ? 'Loading…' : 'Tap to load · scroll mode'}
-              </span>
-            </button>
+              meta={loadingMidiId === entry.id ? 'Loading…' : 'Tap to load · scroll mode'}
+              onClick={() => onSelectMidi(entry.id)}
+            />
           ))}
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
