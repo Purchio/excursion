@@ -70,13 +70,28 @@ Open the local URL on your iPhone or iPad (same Wi‑Fi network) for testing cha
 - **Song catalog** is hand-authored simplified arrangements, not full transcriptions
 - **iOS requires HTTPS** for mic/camera in production (localhost works for dev)
 
-## Roadmap ideas
+## Roadmap — best of both apps
 
-- [ ] Import MIDI files for any song
-- [ ] Left-hand / both-hands modes
-- [ ] Metronome and tempo control
+Our app ([excursion](https://purchio.github.io/excursion/)) verifies you on a **real piano** via mic + camera. The other [piano-coach.vercel.app](https://piano-coach.vercel.app/) app excels at **MIDI playback**, falling notes, and a large song library. Go-forward plan:
+
+| Feature | Priority | Notes |
+|---|---|---|
+| Falling notes (Synthesia-style) | Nice-to-have | Blue/red lanes per hand, notes scroll toward keys |
+| Finger on every note (1–5 per hand) | Nice-to-have | “Mavis Beacon for piano” — thumb vs pinky on each note |
+| MIDI / MusicXML import | High | Unlock Sky Full of Stars, full library, user uploads |
+| Song audio playback | Nice-to-have | Hear the song while you play along (speakers/headphones) |
+| Mic verification during scroll mode | Core differentiator | Other app shows notes; we confirm you hit them |
+
+Completed:
+
 - [x] Audio calibration wizard
 - [x] Camera keyboard map with key overlays
+- [x] Per-note finger hints (practice mode)
+- [ ] Falling notes view with L/R hand lanes
+- [ ] Finger labels on all falling notes (both hands)
+- [ ] MIDI import (Load MIDI/MusicXML)
+- [ ] Playback audio + scroll sync
+- [ ] Larger built-in song catalog
 
 ## License
 
