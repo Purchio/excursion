@@ -16,7 +16,7 @@ import { CalibratedCameraView } from './CalibratedCameraView';
 import { HandPlan } from './HandPlan';
 import { MicPermissionHelp } from './MicPermissionHelp';
 import { PianoKeyboard } from './PianoKeyboard';
-import { ScrollMicBanner } from './ScrollMicBanner';
+import { BpmControl } from './BpmControl';
 import { queryMicPermission } from '../utils/deviceUtils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +24,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Camera, ChevronLeft } from 'lucide-react';
+import { Camera, ChevronLeft, Pause, Play, Square } from 'lucide-react';
 
 interface PlayAlongModeProps {
   song: TimedSong;
@@ -45,8 +45,6 @@ export function PlayAlongMode({ song, onBack, onSwitchToGuided }: PlayAlongModeP
   const {
     isListening,
     detectedMidi,
-    detectedNote,
-    volume,
     error: micError,
     startListening,
     stopListening,
@@ -59,8 +57,8 @@ export function PlayAlongMode({ song, onBack, onSwitchToGuided }: PlayAlongModeP
   const {
     isPlaying,
     currentTimeMs,
-    speed,
-    setSpeed,
+    bpm,
+    setBpm,
     play,
     pause,
     resume,
@@ -168,11 +166,35 @@ export function PlayAlongMode({ song, onBack, onSwitchToGuided }: PlayAlongModeP
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-2">
+        {!isPlaying && currentTimeMs === 0 ? (
+          <Button size="icon" onClick={handleStart} title="Start">
+            <Play className="h-4 w-4" />
+          </Button>
+        ) : isPlaying ? (
+          <Button size="icon" variant="secondary" onClick={handlePause} title="Pause">
+            <Pause className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button size="icon" onClick={handleResume} title="Resume">
+            <Play className="h-4 w-4" />
+          </Button>
+        )}
+        {(isPlaying || currentTimeMs > 0) && (
+          <Button size="icon" variant="outline" onClick={handleStop} title="Stop">
+            <Square className="h-3.5 w-3.5" />
+          </Button>
+        )}
+        <span className="text-sm tabular-nums text-muted-foreground">
+          {formatDuration(currentTimeMs)} / {formatDuration(song.durationMs)}
+        </span>
+        <div className="ml-auto">
+          <BpmControl bpm={bpm} onChange={setBpm} />
+        </div>
+      </div>
+
       <div className="space-y-1">
         <Progress value={progress * 100} className="h-1.5" />
-        <p className="text-center text-xs text-muted-foreground">
-          {formatDuration(currentTimeMs)} / {formatDuration(song.durationMs)}
-        </p>
       </div>
 
       {!isPlaying && currentTimeMs === 0 ? (
@@ -201,17 +223,12 @@ export function PlayAlongMode({ song, onBack, onSwitchToGuided }: PlayAlongModeP
             fullRangeEnd={FULL_KEYBOARD_END}
           />
 
-          {micEnabled && (
-            <ScrollMicBanner
-              leadNotes={leadAtHit}
-              detectedNote={detectedNote}
-              volume={volume}
-              matchedNote={matchedNote}
-            />
-          )}
 
-          {leadLine && !micEnabled && (
-            <p className="text-center text-sm text-muted-foreground">Now: {leadLine}</p>
+          {leadLine && (
+            <p className="text-center text-sm text-muted-foreground">
+              {micEnabled && hitCount > 0 ? `${hitCount} verified · ` : ''}
+              Now: {leadLine}
+            </p>
           )}
         </>
       )}
@@ -225,43 +242,10 @@ export function PlayAlongMode({ song, onBack, onSwitchToGuided }: PlayAlongModeP
         />
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
-        {!isPlaying && currentTimeMs === 0 ? (
-          <Button className="flex-1" size="lg" onClick={handleStart}>
-            {micEnabled ? 'Start (mic on, audio muted)' : 'Start'}
-          </Button>
-        ) : isPlaying ? (
-          <Button variant="secondary" onClick={handlePause}>
-            Pause
-          </Button>
-        ) : (
-          <Button onClick={handleResume}>Resume</Button>
-        )}
-        {(isPlaying || currentTimeMs > 0) && (
-          <Button variant="outline" onClick={handleStop}>
-            Stop
-          </Button>
-        )}
-        <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
-          <Label htmlFor="speed">Speed</Label>
-          <select
-            id="speed"
-            value={speed}
-            onChange={(e) => setSpeed(Number(e.target.value))}
-            className="rounded-md border border-input bg-background px-2 py-1 text-sm"
-          >
-            <option value={0.5}>0.5×</option>
-            <option value={0.75}>0.75×</option>
-            <option value={1}>1×</option>
-            <option value={1.25}>1.25×</option>
-          </select>
-        </div>
-      </div>
-
-      {micEnabled && isPlaying && (
-        <p className="text-center text-sm text-muted-foreground">
-          {hitCount} notes verified on your piano
-        </p>
+      {!isPlaying && currentTimeMs === 0 && !micEnabled && (
+        <Button className="w-full" size="lg" onClick={handleStart}>
+          Start
+        </Button>
       )}
 
       {micError && (

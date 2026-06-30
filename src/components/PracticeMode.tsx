@@ -7,8 +7,6 @@ import { FULL_KEYBOARD_END, FULL_KEYBOARD_START } from '../utils/keyboardLayout'
 import { queryMicPermission } from '../utils/deviceUtils';
 import { midiToNote } from '../utils/noteUtils';
 import { CalibratedCameraView } from './CalibratedCameraView';
-import { DetectionDebug } from './DetectionDebug';
-import { KeyMatchBanner } from './KeyMatchBanner';
 import { MicPermissionHelp } from './MicPermissionHelp';
 import { PianoKeyboard } from './PianoKeyboard';
 
@@ -33,9 +31,7 @@ export function PracticeMode({ song, onBack, onSwitchToPlayAlong }: PracticeMode
   const {
     isListening,
     detectedMidi,
-    detectedNote,
     volume,
-    rawFrequency,
     error: micError,
     startListening,
     stopListening,
@@ -195,21 +191,14 @@ export function PracticeMode({ song, onBack, onSwitchToPlayAlong }: PracticeMode
                 fullRangeEnd={FULL_KEYBOARD_END}
               />
 
-              <KeyMatchBanner
-                expectedMidi={currentNote?.midi ?? null}
-                detectedMidi={detectedMidi}
-                detectedNote={detectedNote}
-                volume={volume}
-              />
-
-              <DetectionDebug
-                volume={volume}
-                detectedNote={detectedNote}
-                detectedMidi={detectedMidi}
-                expectedMidi={currentNote?.midi ?? null}
-                rawFrequency={rawFrequency}
-                sampleCount={0}
-              />
+              {isListening && (
+                <div className="mx-auto mt-2 h-1 max-w-xs overflow-hidden rounded-full bg-secondary">
+                  <div
+                    className="h-full bg-primary transition-all duration-75"
+                    style={{ width: `${Math.min(volume * 400, 100)}%` }}
+                  />
+                </div>
+              )}
             </>
           )}
 

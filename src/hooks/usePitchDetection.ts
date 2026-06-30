@@ -48,7 +48,9 @@ export function usePitchDetection(): UsePitchDetectionResult {
     setVolume(rms);
 
     const frequency = detectPitch(buffer, analyser.context.sampleRate);
-    if (frequency) {
+    const NOTE_THRESHOLD = 0.014;
+
+    if (frequency && rms >= NOTE_THRESHOLD) {
       setRawFrequency(frequency);
       const audioKeys = calibration?.audioKeys ?? [];
       const midi =
@@ -59,11 +61,9 @@ export function usePitchDetection(): UsePitchDetectionResult {
       if (midi !== null) {
         setDetectedMidi(midi);
         setDetectedNote(midiToNote(midi));
-        if (rms > 0.006) {
-          setFrequencySamples((prev) => [...prev.slice(-30), frequency]);
-        }
+        setFrequencySamples((prev) => [...prev.slice(-30), frequency]);
       }
-    } else {
+    } else if (rms < NOTE_THRESHOLD * 0.6) {
       setRawFrequency(null);
       setDetectedMidi(null);
       setDetectedNote(null);

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
 import type { TimedNote } from '../types/song';
 
+export const DEFAULT_BPM = 100;
+
 interface UseMidiPlaybackOptions {
   notes: TimedNote[];
   muted?: boolean;
@@ -12,7 +14,8 @@ interface UseMidiPlaybackOptions {
 export function useMidiPlayback({ notes, muted = false, onTimeUpdate, onComplete }: UseMidiPlaybackOptions) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTimeMs, setCurrentTimeMs] = useState(0);
-  const [speed, setSpeed] = useState(1);
+  const [bpm, setBpm] = useState(DEFAULT_BPM);
+  const speed = bpm / DEFAULT_BPM;
   const synthRef = useRef<Tone.PolySynth | null>(null);
   const partRef = useRef<Tone.Part | null>(null);
   const rafRef = useRef<number>(0);
@@ -147,8 +150,8 @@ export function useMidiPlayback({ notes, muted = false, onTimeUpdate, onComplete
   return {
     isPlaying,
     currentTimeMs,
-    speed,
-    setSpeed,
+    bpm,
+    setBpm,
     play,
     pause,
     resume,
