@@ -24,32 +24,17 @@ Before your first practice session:
 
 After calibration, note detection uses your piano's tuning instead of generic pitch tables, and the camera view shows glowing dots on your real keys during practice.
 
-## Use on your iPad (no Mac required)
+## Use on your iPad
 
-### Recommended: Vercel (simple URL, works reliably on iPad)
+**https://piano-coach.vercel.app/**
 
-1. Go to [vercel.com](https://vercel.com) and sign in with GitHub
-2. Click **Add New → Project**
-3. Import the **excursion** repo (or **piano-coach** after rename)
-4. Leave all settings as default → click **Deploy**
-5. In ~1 minute you'll get a URL like **`https://excursion-xxx.vercel.app`** — open that in **Safari** on your iPad
+Same URL as your laptop. Open it in **Safari** on your iPad, then:
 
-That's the link to bookmark and add to your home screen. No `github.io` path, no manual GitHub Pages setup.
+1. Tap **Share → Add to Home Screen**
+2. Tap **Calibrate piano** (top right) before your first session
+3. Pick a song → **Enable microphone & start** → tap **Allow** when Safari asks
 
-### Alternative: GitHub Pages
-
-**https://purchio.github.io/excursion/** (legacy — often broken until Pages is configured)
-
-Only use this if you've already set up the `gh-pages` branch in repo Settings → Pages. Vercel is easier.
-
-### Once the app is open on your iPad
-
-1. Open the Vercel URL in **Safari** (not Chrome)
-2. When prompted, allow **microphone** and **camera** access
-3. Tap **Share → Add to Home Screen** for a full-screen app icon
-4. Tap **Calibrate piano** before your first session
-
-**Remember:** The app listens to your piano — it does not play song audio through the iPad speakers.
+The app listens to your piano through the mic — it does not play song audio through the iPad speakers.
 
 ## Local development (Mac only)
 
