@@ -1,5 +1,7 @@
 # Piano Coach
 
+> **Repo rename:** This project will live at [github.com/Purchio/piano-coach](https://github.com/Purchio/piano-coach). See [RENAME.md](RENAME.md) for the one-time GitHub Settings step.
+
 Learn to play your baby grand piano using your iPhone or iPad. Piano Coach listens through the microphone, shows which keys to press on an on-screen keyboard, and guides you through songs one note at a time — including simplified Muse piano intros.
 
 ## Features
@@ -24,7 +26,7 @@ After calibration, note detection uses your piano's tuning instead of generic pi
 
 ## Use on your iPad (no Mac required)
 
-**Live app:** [https://purchio.github.io/excursion/](https://purchio.github.io/excursion/)
+**Live app:** [https://purchio.github.io/piano-coach/](https://purchio.github.io/piano-coach/)
 
 1. Open that link in **Safari** on your iPad (not Chrome)
 2. When prompted, allow **microphone** and **camera** access
