@@ -1104,7 +1104,20 @@ body {
   overflow: hidden;
   border: 1px solid var(--surface-2);
   margin: 12px 0;
-  background: #12121a;
+  background: #14141c;
+}
+
+.falling-notes--calm {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.falling-notes-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 6px 8px 10px;
+  margin: 0;
+  opacity: 0.7;
 }
 
 .falling-notes canvas {

@@ -166,8 +166,7 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
       <FallingNotes
         notes={song.notes}
         currentTimeMs={currentTimeMs}
-        startMidi={song.startMidi}
-        endMidi={song.endMidi}
+        isPlaying={isPlaying}
       />
 
       {!isPlaying && currentTimeMs === 0 ? (
