@@ -85,7 +85,7 @@ export function SongPicker({
       <div>
         <h2 className="text-lg font-semibold">Choose a song</h2>
         <p className="text-sm text-muted-foreground">
-          Guided for beginners · Scroll with falling notes for everything else.
+          Guided for beginners · Play along with hand planning for everything else.
         </p>
       </div>
 
@@ -106,7 +106,7 @@ export function SongPicker({
               description={song.description}
               badge={song.difficulty}
               badgeVariant={difficultyVariant(song.difficulty)}
-              meta={`${song.notes.length} notes · ${formatDuration(song.durationMs)} · ${song.defaultMode === 'scroll' ? 'scroll' : 'guided'}`}
+              meta={`${song.notes.length} notes · ${formatDuration(song.durationMs)} · ${song.defaultMode === 'playalong' ? 'play along' : 'guided'}`}
               onClick={() => onSelect(song)}
             />
           ))}
@@ -122,7 +122,7 @@ export function SongPicker({
               badge="MIDI"
               dashed
               disabled={loadingMidiId === entry.id}
-              meta={loadingMidiId === entry.id ? 'Loading…' : 'Tap to load · scroll mode'}
+              meta={loadingMidiId === entry.id ? 'Loading…' : 'Tap to load · play along'}
               onClick={() => onSelectMidi(entry.id)}
             />
           ))}

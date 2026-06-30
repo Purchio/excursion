@@ -30,7 +30,7 @@ export function legacySongToTimed(song: Song): TimedSong {
     startMidi: song.startMidi,
     endMidi: song.endMidi,
     source: 'builtin',
-    defaultMode: song.difficulty === 'beginner' ? 'guided' : 'scroll',
+    defaultMode: song.difficulty === 'beginner' ? 'guided' : 'playalong',
   };
 }
 

@@ -5,10 +5,13 @@ interface PianoKeyboardProps {
   startMidi: number;
   endMidi: number;
   highlightedMidi?: number | null;
+  /** Keys to play right now (both hands) */
+  activeMidis?: number[];
+  /** Keys in the next moment — soft preview */
+  previewMidis?: number[];
   pressedMidi?: number | null;
   correctMidi?: number | null;
   showFinger?: number;
-  /** Show full keyboard range for counting keys (scrolls to highlight) */
   showFullKeyboard?: boolean;
   fullRangeStart?: number;
   fullRangeEnd?: number;
@@ -40,6 +43,8 @@ export function PianoKeyboard({
   startMidi,
   endMidi,
   highlightedMidi,
+  activeMidis = [],
+  previewMidis = [],
   pressedMidi,
   correctMidi,
   showFinger,
@@ -53,26 +58,31 @@ export function PianoKeyboard({
   const whiteWidth = showFullKeyboard ? FULL_WHITE_WIDTH : PRACTICE_WHITE_WIDTH;
   const blackWidth = showFullKeyboard ? 14 : 22;
 
+  const activeSet = new Set(activeMidis);
+  if (highlightedMidi != null) activeSet.add(highlightedMidi);
+  const previewSet = new Set(previewMidis.filter((m) => !activeSet.has(m)));
+  const scrollTarget = highlightedMidi ?? activeMidis[0] ?? previewMidis[0] ?? null;
+
   const keys = getPianoKeys(displayStart, displayEnd);
   const whiteKeys = keys.filter((k) => !k.isBlack);
   const blackKeys = keys.filter((k) => k.isBlack);
   const width = whiteKeys.length * whiteWidth;
 
   useEffect(() => {
-    if (!highlightedMidi || !containerRef.current) return;
-    const target = containerRef.current.querySelector(`[data-midi="${highlightedMidi}"]`);
+    if (scrollTarget == null || !containerRef.current) return;
+    const target = containerRef.current.querySelector(`[data-midi="${scrollTarget}"]`);
     target?.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
-  }, [highlightedMidi, displayStart, displayEnd]);
+  }, [scrollTarget, displayStart, displayEnd]);
 
   const whiteKeyPosition =
-    highlightedMidi != null ? getWhiteKeyIndex(highlightedMidi, displayStart) : null;
+    scrollTarget != null ? getWhiteKeyIndex(scrollTarget, displayStart) : null;
 
   return (
     <div className={`piano-wrapper ${showFullKeyboard ? 'piano-wrapper--full' : ''}`}>
-      {showFullKeyboard && highlightedMidi != null && (
+      {showFullKeyboard && scrollTarget != null && (
         <p className="piano-position-hint">
-          <strong>White key #{whiteKeyPosition}</strong> from the left — scroll the keyboard to
-          find the yellow key ({midiToNote(highlightedMidi)})
+          <strong>White key #{whiteKeyPosition}</strong> from the left — yellow keys are what you
+          play now ({activeSet.size > 1 ? 'both hands' : midiToNote(scrollTarget)})
         </p>
       )}
       <div
@@ -87,13 +97,15 @@ export function PianoKeyboard({
         >
           {whiteKeys.map((key) => {
             const index = whiteKeys.indexOf(key);
-            const isHighlighted = key.midi === highlightedMidi;
+            const isActive = activeSet.has(key.midi);
+            const isPreview = previewSet.has(key.midi);
             const isPressed = key.midi === pressedMidi;
             const isCorrect = key.midi === correctMidi;
             let fill = '#f5f0e8';
             if (isCorrect) fill = '#4ade80';
             else if (isPressed) fill = '#7c6cff';
-            else if (isHighlighted) fill = '#fde68a';
+            else if (isActive) fill = '#fde68a';
+            else if (isPreview) fill = '#e8e0c8';
 
             return (
               <g key={key.midi} data-midi={key.midi}>
@@ -104,8 +116,9 @@ export function PianoKeyboard({
                   height={WHITE_HEIGHT}
                   rx={2}
                   fill={fill}
-                  stroke={isHighlighted ? '#f59e0b' : '#333'}
-                  strokeWidth={isHighlighted ? 2.5 : 1}
+                  stroke={isActive ? '#f59e0b' : isPreview ? '#a8a090' : '#333'}
+                  strokeWidth={isActive ? 2.5 : isPreview ? 1.5 : 1}
+                  strokeDasharray={isPreview ? '3 2' : undefined}
                 />
                 {(showFullKeyboard || key.midi % 12 === 0) && (
                   <text
@@ -124,13 +137,15 @@ export function PianoKeyboard({
 
           {blackKeys.map((key) => {
             const x = getBlackKeyOffset(key.midi, keys, whiteWidth, blackWidth);
-            const isHighlighted = key.midi === highlightedMidi;
+            const isActive = activeSet.has(key.midi);
+            const isPreview = previewSet.has(key.midi);
             const isPressed = key.midi === pressedMidi;
             const isCorrect = key.midi === correctMidi;
             let fill = '#1a1a24';
             if (isCorrect) fill = '#22c55e';
             else if (isPressed) fill = '#6d5ce0';
-            else if (isHighlighted) fill = '#f59e0b';
+            else if (isActive) fill = '#f59e0b';
+            else if (isPreview) fill = '#3a3540';
 
             return (
               <rect
@@ -142,19 +157,20 @@ export function PianoKeyboard({
                 height={BLACK_HEIGHT}
                 rx={2}
                 fill={fill}
-                stroke={isHighlighted ? '#f59e0b' : '#000'}
-                strokeWidth={isHighlighted ? 2 : 1}
+                stroke={isActive ? '#f59e0b' : isPreview ? '#666' : '#000'}
+                strokeWidth={isActive ? 2 : 1}
+                strokeDasharray={isPreview ? '3 2' : undefined}
               />
             );
           })}
         </svg>
       </div>
 
-      {showFinger && highlightedMidi && (
+      {showFinger && scrollTarget && (
         <div className="finger-hint">
           <span className="finger-number">{showFinger}</span>
           <span className="finger-name">{fingerLabel(showFinger)}</span>
-          <span className="finger-note">Play {midiToNote(highlightedMidi)}</span>
+          <span className="finger-note">Play {midiToNote(scrollTarget)}</span>
         </div>
       )}
     </div>

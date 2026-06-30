@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { TimedSong, PracticeStyle } from '../types/song';
 import { PracticeMode } from './PracticeMode';
-import { ScrollPracticeMode } from './ScrollPracticeMode';
+import { PlayAlongMode } from './PlayAlongMode';
 import { legacySongToTimed } from '../utils/songUtils';
 import type { Song } from '../data/songs';
 
@@ -11,7 +11,7 @@ interface UnifiedPracticeProps {
 }
 
 export function UnifiedPractice({ song, onBack }: UnifiedPracticeProps) {
-  const [mode, setMode] = useState<PracticeStyle>(song.defaultMode ?? 'scroll');
+  const [mode, setMode] = useState<PracticeStyle>(song.defaultMode ?? 'playalong');
 
   if (mode === 'guided') {
     const legacy: Song = {
@@ -33,13 +33,13 @@ export function UnifiedPractice({ song, onBack }: UnifiedPracticeProps) {
       <PracticeMode
         song={legacy}
         onBack={onBack}
-        onSwitchToScroll={() => setMode('scroll')}
+        onSwitchToPlayAlong={() => setMode('playalong')}
       />
     );
   }
 
   return (
-    <ScrollPracticeMode
+    <PlayAlongMode
       song={song}
       onBack={onBack}
       onSwitchToGuided={() => setMode('guided')}

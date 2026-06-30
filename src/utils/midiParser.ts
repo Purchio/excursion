@@ -96,7 +96,7 @@ export function parseMidiBuffer(
     endMidi,
     source: meta.midiPath ? 'midi' : 'upload',
     midiPath: meta.midiPath,
-    defaultMode: 'scroll',
+    defaultMode: 'playalong',
   };
 }
 

@@ -11,8 +11,9 @@ import {
   getLeadNotesAtHitLine,
   matchAnyExpected,
 } from '../utils/scrollPractice';
+import { getHandMoments, midisForMoment } from '../utils/handPlan';
 import { CalibratedCameraView } from './CalibratedCameraView';
-import { FallingNotes } from './FallingNotes';
+import { HandPlan } from './HandPlan';
 import { MicPermissionHelp } from './MicPermissionHelp';
 import { PianoKeyboard } from './PianoKeyboard';
 import { ScrollMicBanner } from './ScrollMicBanner';
@@ -25,15 +26,14 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Camera, ChevronLeft } from 'lucide-react';
 
-interface ScrollPracticeModeProps {
+interface PlayAlongModeProps {
   song: TimedSong;
   onBack: () => void;
   onSwitchToGuided?: () => void;
 }
 
-export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPracticeModeProps) {
+export function PlayAlongMode({ song, onBack, onSwitchToGuided }: PlayAlongModeProps) {
   const { calibration } = useCalibration();
-  // Mic off by default — full MIDI arrangements + speaker playback confuse pitch detection
   const [micEnabled, setMicEnabled] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [micPermission, setMicPermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
@@ -76,9 +76,15 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
     [song.notes, currentTimeMs],
   );
 
-  const primaryMidi = leadAtHit.find((n) => n.hand === 'right')?.midi
-    ?? leadAtHit[0]?.midi
-    ?? null;
+  const moments = useMemo(
+    () => getHandMoments(song.notes, currentTimeMs, 6),
+    [song.notes, currentTimeMs],
+  );
+
+  const nowMoment = moments[0] ?? null;
+  const nextMoment = moments[1] ?? null;
+  const activeMidis = nowMoment ? midisForMoment(nowMoment) : [];
+  const previewMidis = nextMoment ? midisForMoment(nextMoment) : [];
 
   const matchedNote = useMemo(
     () =>
@@ -127,7 +133,7 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
   const leadLine = formatLeadNotesLine(leadAtHit);
 
   return (
-    <div className="practice-mode scroll-practice space-y-4">
+    <div className="practice-mode playalong space-y-4">
       <header className="flex items-center gap-3">
         <Button variant="ghost" size="sm" onClick={onBack}>
           <ChevronLeft className="h-4 w-4" />
@@ -148,7 +154,7 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
       </header>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Badge>Scroll mode</Badge>
+        <Badge variant="secondary">Play along</Badge>
         {onSwitchToGuided && (
           <Button variant="link" size="sm" className="h-auto p-0" onClick={onSwitchToGuided}>
             Switch to guided
@@ -169,30 +175,26 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
         </p>
       </div>
 
-      <FallingNotes
-        notes={song.notes}
-        currentTimeMs={currentTimeMs}
-        isPlaying={isPlaying}
-      />
-
       {!isPlaying && currentTimeMs === 0 ? (
         <Alert>
           <AlertDescription>
-            <p className="font-medium text-foreground">Falling notes + playback</p>
+            <p className="font-medium text-foreground">See where your hands go</p>
             <p className="mt-1 text-sm">
-              Blue = right hand, red = left. Numbers = fingers.
-              {micEnabled
-                ? ' Mic verify is on — speaker audio mutes so the iPad only hears your piano.'
-                : ' Turn on Mic verify to check keys on your real piano.'}
+              Yellow keys = play now. Dashed keys = next position. Plan both hands like a real
+              pianist — no falling notes.
+              {micEnabled && ' Mic on mutes speaker audio.'}
             </p>
           </AlertDescription>
         </Alert>
       ) : (
         <>
+          <HandPlan now={nowMoment} upcoming={moments} />
+
           <PianoKeyboard
             startMidi={song.startMidi}
             endMidi={song.endMidi}
-            highlightedMidi={primaryMidi}
+            activeMidis={activeMidis}
+            previewMidis={previewMidis}
             pressedMidi={detectedMidi}
             showFullKeyboard
             fullRangeStart={FULL_KEYBOARD_START}
@@ -208,10 +210,8 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
             />
           )}
 
-          {leadLine && (
-            <p className="text-center text-sm text-amber-200/90">
-              {micEnabled ? 'Target: ' : 'Now: '}{leadLine}
-            </p>
+          {leadLine && !micEnabled && (
+            <p className="text-center text-sm text-muted-foreground">Now: {leadLine}</p>
           )}
         </>
       )}
@@ -228,7 +228,7 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
       <div className="flex flex-wrap items-center gap-2">
         {!isPlaying && currentTimeMs === 0 ? (
           <Button className="flex-1" size="lg" onClick={handleStart}>
-            {micEnabled ? 'Start (mic on, audio muted)' : 'Start playback'}
+            {micEnabled ? 'Start (mic on, audio muted)' : 'Start'}
           </Button>
         ) : isPlaying ? (
           <Button variant="secondary" onClick={handlePause}>
@@ -272,7 +272,7 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
 
       <CalibratedCameraView
         enabled={showCamera}
-        highlightedMidi={primaryMidi}
+        highlightedMidi={activeMidis[0] ?? null}
         detectedMidi={detectedMidi}
       />
     </div>

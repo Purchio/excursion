@@ -1,7 +1,7 @@
 export type Hand = 'left' | 'right';
 export type SongDifficulty = 'beginner' | 'intermediate' | 'advanced';
 export type SongSource = 'builtin' | 'midi' | 'upload';
-export type PracticeStyle = 'guided' | 'scroll';
+export type PracticeStyle = 'guided' | 'playalong';
 
 export interface TimedNote {
   midi: number;

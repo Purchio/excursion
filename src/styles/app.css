@@ -1098,31 +1098,8 @@ body {
   margin-left: auto;
 }
 
-.falling-notes {
-  width: 100%;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid var(--surface-2);
-  margin: 12px 0;
-  background: #14141c;
-}
-
-.falling-notes--calm {
-  border-color: rgba(255, 255, 255, 0.06);
-}
-
-.falling-notes-hint {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-align: center;
-  padding: 6px 8px 10px;
-  margin: 0;
-  opacity: 0.7;
-}
-
-.falling-notes canvas {
-  display: block;
-  width: 100%;
+.playalong .piano-wrapper {
+  margin-top: 8px;
 }
 
 .playback-controls {
@@ -1212,9 +1189,5 @@ body {
 
 .song-card--midi {
   border-style: dashed;
-}
-
-.scroll-practice .piano-wrapper {
-  margin-top: 8px;
 }
 

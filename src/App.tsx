@@ -46,7 +46,7 @@ function AppContent() {
           </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight">Super Piano Coach</h1>
-            <p className="text-sm text-muted-foreground">Falling notes · fingers · mic verify</p>
+            <p className="text-sm text-muted-foreground">Fingers · hand plan · mic verify</p>
           </div>
         </div>
         <Button
@@ -73,11 +73,11 @@ function AppContent() {
             <OnboardingBanner />
             <section className="mb-6 space-y-4">
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Learn on your real piano — falling notes show what to play, synthesized audio
-                plays along, and your iPhone mic verifies each key.
+                Learn on your real piano — see where both hands go, hear the reference audio,
+                and let your iPhone mic verify each key.
               </p>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">Falling notes</Badge>
+                <Badge variant="secondary">Hand planning</Badge>
                 <Badge variant="secondary">MIDI playback</Badge>
                 <Badge variant="secondary">Mic verify</Badge>
                 <Badge variant="secondary">MIDI import</Badge>
