@@ -4,23 +4,44 @@ import type { TimedNote } from '../types/song';
 
 export const DEFAULT_BPM = 100;
 
+export interface LoopRegion {
+  startMs: number;
+  endMs: number;
+}
+
 interface UseMidiPlaybackOptions {
   notes: TimedNote[];
   muted?: boolean;
+  loop?: LoopRegion | null;
   onTimeUpdate?: (timeMs: number) => void;
   onComplete?: () => void;
+  onLoop?: () => void;
 }
 
-export function useMidiPlayback({ notes, muted = false, onTimeUpdate, onComplete }: UseMidiPlaybackOptions) {
+export function useMidiPlayback({
+  notes,
+  muted = false,
+  loop = null,
+  onTimeUpdate,
+  onComplete,
+  onLoop,
+}: UseMidiPlaybackOptions) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTimeMs, setCurrentTimeMs] = useState(0);
   const [bpm, setBpm] = useState(DEFAULT_BPM);
+  const [loopCount, setLoopCount] = useState(0);
   const speed = bpm / DEFAULT_BPM;
   const synthRef = useRef<Tone.PolySynth | null>(null);
   const partRef = useRef<Tone.Part | null>(null);
   const rafRef = useRef<number>(0);
   const startWallRef = useRef(0);
   const pausedAtRef = useRef(0);
+  const loopRef = useRef(loop);
+  loopRef.current = loop;
+
+  const songEndMs = notes.reduce((m, n) => Math.max(m, n.startMs + n.durationMs), 0);
+  const endMs = loop ? loop.endMs : songEndMs;
+  const startMs = loop?.startMs ?? 0;
 
   const dispose = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
@@ -70,19 +91,37 @@ export function useMidiPlayback({ notes, muted = false, onTimeUpdate, onComplete
     return dispose;
   }, [buildPart, dispose]);
 
+  const restartLoop = useCallback(() => {
+    const region = loopRef.current;
+    if (!region) return;
+    pausedAtRef.current = region.startMs;
+    startWallRef.current = performance.now();
+    partRef.current?.stop();
+    partRef.current?.start(0, region.startMs / 1000);
+    setLoopCount((c) => c + 1);
+    onLoop?.();
+  }, [onLoop]);
+
   const tick = useCallback(() => {
     const elapsed = (performance.now() - startWallRef.current) * speed + pausedAtRef.current;
     setCurrentTimeMs(elapsed);
     onTimeUpdate?.(elapsed);
 
-    const duration = notes.reduce((m, n) => Math.max(m, n.startMs + n.durationMs), 0);
-    if (elapsed >= duration) {
+    const region = loopRef.current;
+    if (region && elapsed >= region.endMs) {
+      restartLoop();
+      rafRef.current = requestAnimationFrame(tick);
+      return;
+    }
+
+    if (!region && elapsed >= songEndMs) {
       setIsPlaying(false);
       onComplete?.();
       return;
     }
+
     rafRef.current = requestAnimationFrame(tick);
-  }, [notes, onTimeUpdate, onComplete, speed]);
+  }, [onTimeUpdate, onComplete, speed, songEndMs, restartLoop]);
 
   const play = useCallback(async () => {
     await Tone.start();
@@ -92,16 +131,16 @@ export function useMidiPlayback({ notes, muted = false, onTimeUpdate, onComplete
 
     part.stop();
     part.cancel(0);
+    pausedAtRef.current = startMs;
     startWallRef.current = performance.now();
-    pausedAtRef.current = 0;
-    setCurrentTimeMs(0);
+    setCurrentTimeMs(startMs);
     Tone.Transport.bpm.value = 120;
     Tone.Transport.start();
-    part.start(0);
+    part.start(0, startMs / 1000);
     setIsPlaying(true);
     cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(tick);
-  }, [buildPart, tick]);
+  }, [buildPart, tick, startMs]);
 
   const pause = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
@@ -126,36 +165,43 @@ export function useMidiPlayback({ notes, muted = false, onTimeUpdate, onComplete
     cancelAnimationFrame(rafRef.current);
     partRef.current?.stop();
     Tone.Transport.stop();
-    pausedAtRef.current = 0;
-    setCurrentTimeMs(0);
+    pausedAtRef.current = startMs;
+    setCurrentTimeMs(startMs);
     setIsPlaying(false);
-  }, []);
+    setLoopCount(0);
+  }, [startMs]);
 
   useEffect(() => {
     if (partRef.current) partRef.current.playbackRate = speed;
   }, [speed]);
 
-  const seek = useCallback((ms: number) => {
-    const wasPlaying = isPlaying;
-    partRef.current?.stop();
-    pausedAtRef.current = ms;
-    setCurrentTimeMs(ms);
-    if (wasPlaying) {
-      partRef.current?.start(0, ms / 1000);
-      startWallRef.current = performance.now();
-      rafRef.current = requestAnimationFrame(tick);
-    }
-  }, [isPlaying, tick]);
+  const seek = useCallback(
+    (ms: number) => {
+      const wasPlaying = isPlaying;
+      partRef.current?.stop();
+      pausedAtRef.current = ms;
+      setCurrentTimeMs(ms);
+      if (wasPlaying) {
+        partRef.current?.start(0, ms / 1000);
+        startWallRef.current = performance.now();
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    },
+    [isPlaying, tick],
+  );
 
   return {
     isPlaying,
     currentTimeMs,
     bpm,
     setBpm,
+    loopCount,
     play,
     pause,
     resume,
     stop,
     seek,
+    regionEndMs: endMs,
+    regionStartMs: startMs,
   };
 }

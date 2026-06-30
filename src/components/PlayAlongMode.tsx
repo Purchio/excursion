@@ -24,7 +24,10 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Camera, ChevronLeft, Pause, Play, Square } from 'lucide-react';
+import { Camera, ChevronLeft, Pause, Play, Repeat, Square } from 'lucide-react';
+import type { PracticePattern } from '../types/pattern';
+import { PatternPicker } from './PatternPicker';
+import { PatternLoopMode } from './PatternLoopMode';
 
 interface PlayAlongModeProps {
   song: TimedSong;
@@ -38,6 +41,8 @@ export function PlayAlongMode({ song, onBack, onSwitchToGuided }: PlayAlongModeP
   const [showCamera, setShowCamera] = useState(false);
   const [micPermission, setMicPermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
   const [hitCount, setHitCount] = useState(0);
+  const [showPatterns, setShowPatterns] = useState(false);
+  const [activePattern, setActivePattern] = useState<PracticePattern | null>(null);
   const scoredRef = useRef<Set<string>>(new Set());
 
   const audioKeys = calibration?.audioKeys ?? [];
@@ -130,7 +135,28 @@ export function PlayAlongMode({ song, onBack, onSwitchToGuided }: PlayAlongModeP
   const progress = song.durationMs > 0 ? currentTimeMs / song.durationMs : 0;
   const leadLine = formatLeadNotesLine(leadAtHit);
 
+  if (activePattern) {
+    return (
+      <PatternLoopMode
+        song={song}
+        pattern={activePattern}
+        onBack={() => setActivePattern(null)}
+      />
+    );
+  }
+
   return (
+    <>
+      {showPatterns && (
+        <PatternPicker
+          song={song}
+          onClose={() => setShowPatterns(false)}
+          onSelect={(p) => {
+            setShowPatterns(false);
+            setActivePattern(p);
+          }}
+        />
+      )}
     <div className="practice-mode playalong space-y-4">
       <header className="flex items-center gap-3">
         <Button variant="ghost" size="sm" onClick={onBack}>
@@ -153,6 +179,10 @@ export function PlayAlongMode({ song, onBack, onSwitchToGuided }: PlayAlongModeP
 
       <div className="flex flex-wrap items-center gap-3">
         <Badge variant="secondary">Play along</Badge>
+        <Button variant="outline" size="sm" onClick={() => setShowPatterns(true)}>
+          <Repeat className="mr-1 h-3.5 w-3.5" />
+          Practice patterns
+        </Button>
         {onSwitchToGuided && (
           <Button variant="link" size="sm" className="h-auto p-0" onClick={onSwitchToGuided}>
             Switch to guided
@@ -260,5 +290,6 @@ export function PlayAlongMode({ song, onBack, onSwitchToGuided }: PlayAlongModeP
         detectedMidi={detectedMidi}
       />
     </div>
+    </>
   );
 }
