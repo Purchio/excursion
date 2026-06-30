@@ -35,11 +35,12 @@ The app is hosted on GitHub Pages with HTTPS, which iOS requires for mic and cam
 
 ### One-time GitHub setup (repo owner only)
 
-If the live link shows a 404, enable Pages in the repo:
+If the live link shows a blank page or looks broken, enable Pages:
 
 1. GitHub → **Settings** → **Pages**
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**
-3. Push to `master` or re-run the **Deploy to GitHub Pages** workflow
+2. Under **Build and deployment**, set **Source** to **Deploy from a branch**
+3. Set **Branch** to `gh-pages` / `/ (root)`
+4. Save, then wait 1–2 minutes and hard-refresh Safari on your iPad
 
 ## Local development (Mac only)
 

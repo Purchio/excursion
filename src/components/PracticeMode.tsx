@@ -5,6 +5,7 @@ import { usePitchDetection } from '../hooks/usePitchDetection';
 import { notesMatchCalibrated } from '../utils/calibratedPitch';
 import { midiToNote } from '../utils/noteUtils';
 import { CalibratedCameraView } from './CalibratedCameraView';
+import { MicPermissionHelp } from './MicPermissionHelp';
 import { PianoKeyboard } from './PianoKeyboard';
 
 interface PracticeModeProps {
@@ -15,7 +16,7 @@ interface PracticeModeProps {
 type PracticeState = 'ready' | 'waiting' | 'correct' | 'complete';
 
 export function PracticeMode({ song, onBack }: PracticeModeProps) {
-  const { calibration, hasAudioCalibration } = useCalibration();
+  const { calibration } = useCalibration();
   const [noteIndex, setNoteIndex] = useState(0);
   const [practiceState, setPracticeState] = useState<PracticeState>('ready');
   const [showCamera, setShowCamera] = useState(false);
@@ -133,10 +134,14 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
               <>
                 <p className="prompt-label">Ready to learn?</p>
                 <p className="prompt-hint">
-                  {hasAudioCalibration
-                    ? 'Using your calibrated piano profile. Play each highlighted note.'
-                    : 'Place your iPad where the mic can hear the piano. Calibrating first improves accuracy.'}
+                  Play each highlighted note on your <strong>real piano</strong>. The iPad listens
+                  through the mic — you won't hear the song from the iPad speakers.
                 </p>
+                <MicPermissionHelp
+                  onRequestMic={handleStart}
+                  isListening={isListening}
+                  error={micError}
+                />
               </>
             ) : (
               <>
@@ -153,52 +158,56 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
             )}
           </div>
 
-          <PianoKeyboard
-            startMidi={song.startMidi}
-            endMidi={song.endMidi}
-            highlightedMidi={practiceState !== 'ready' ? currentNote?.midi : null}
-            pressedMidi={detectedMidi}
-            correctMidi={isCorrect ? currentNote?.midi : null}
-            showFinger={practiceState !== 'ready' ? currentNote?.finger : undefined}
-          />
-
-          <div className="mic-status">
-            <div className="volume-meter">
-              <div
-                className="volume-fill"
-                style={{ width: `${Math.min(volume * 400, 100)}%` }}
+          {practiceState !== 'ready' && (
+            <>
+              <PianoKeyboard
+                startMidi={song.startMidi}
+                endMidi={song.endMidi}
+                highlightedMidi={currentNote?.midi}
+                pressedMidi={detectedMidi}
+                correctMidi={isCorrect ? currentNote?.midi : null}
+                showFinger={currentNote?.finger}
               />
-            </div>
-            <div className="mic-info">
-              {isListening ? (
-                detectedNote ? (
-                  <span>
-                    Hearing: <strong>{detectedNote}</strong>
-                    {notesMatchCalibrated(detectedMidi, currentNote?.midi ?? -1, audioKeys) && (
-                      <span className="match-badge"> ✓ match</span>
-                    )}
-                  </span>
-                ) : (
-                  <span className="muted">Play a note…</span>
-                )
-              ) : (
-                <span className="muted">Microphone off</span>
-              )}
-            </div>
-          </div>
 
-          {micError && <p className="error-text">{micError}</p>}
+              <div className="mic-status">
+                <div className="volume-meter">
+                  <div
+                    className="volume-fill"
+                    style={{ width: `${Math.min(volume * 400, 100)}%` }}
+                  />
+                </div>
+                <div className="mic-info">
+                  {isListening ? (
+                    detectedNote ? (
+                      <span>
+                        Hearing: <strong>{detectedNote}</strong>
+                        {notesMatchCalibrated(detectedMidi, currentNote?.midi ?? -1, audioKeys) && (
+                          <span className="match-badge"> ✓ match</span>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="muted">Play a note on your piano…</span>
+                    )
+                  ) : (
+                    <span className="muted">Microphone off</span>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {micError && practiceState !== 'ready' && <p className="error-text">{micError}</p>}
 
           <div className="practice-actions">
-            {!isListening ? (
-              <button type="button" className="btn-primary btn-large" onClick={handleStart}>
-                Start practice
-              </button>
-            ) : (
+            {isListening ? (
               <button type="button" className="btn-secondary" onClick={handleStop}>
                 Stop
               </button>
-            )}
+            ) : practiceState !== 'ready' ? (
+              <button type="button" className="btn-primary btn-large" onClick={handleStart}>
+                Start practice
+              </button>
+            ) : null}
           </div>
 
           {isListening && (

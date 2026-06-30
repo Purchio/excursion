@@ -849,3 +849,57 @@ body {
   inset: 0;
   pointer-events: none;
 }
+
+/* Onboarding & permissions */
+.onboarding-banner {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.onboarding-banner h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.onboarding-banner ul {
+  list-style: none;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.onboarding-banner li {
+  line-height: 1.4;
+}
+
+.permission-help {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.permission-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.permission-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.permission-desc--small {
+  font-size: 12px;
+  margin-bottom: 16px;
+}

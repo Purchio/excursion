@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CalibrationProvider, useCalibration } from './context/CalibrationContext';
 import { SONGS } from './data/songs';
 import { CalibrationWizard } from './components/calibration/CalibrationWizard';
+import { OnboardingBanner } from './components/OnboardingBanner';
 import { SongPicker } from './components/SongPicker';
 import { PracticeMode } from './components/PracticeMode';
 import type { Song } from './data/songs';
@@ -42,6 +43,7 @@ function AppContent() {
           <PracticeMode song={selectedSong} onBack={() => setSelectedSong(null)} />
         ) : (
           <>
+            <OnboardingBanner />
             <section className="hero">
               <p>
                 Zero experience? No problem. Pick a song, let your iPhone or iPad listen to
