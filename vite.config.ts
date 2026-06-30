@@ -13,9 +13,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Piano Coach',
+        name: 'Super Piano Coach',
         short_name: 'PianoCoach',
-        description: 'Learn piano with your iPhone or iPad — guided songs, mic feedback, and camera view.',
+        description: 'Falling notes, finger guidance, MIDI playback, and mic verification on your real piano.',
         theme_color: '#0f0f14',
         background_color: '#0f0f14',
         display: 'standalone',

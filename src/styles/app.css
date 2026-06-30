@@ -1058,3 +1058,150 @@ body {
   color: var(--warning);
   margin: 8px 0;
 }
+
+/* Super Piano Coach — scroll mode */
+.scroll-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 8px 0 4px;
+}
+
+.mode-badge {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: rgba(124, 108, 255, 0.15);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: underline;
+}
+
+.toggle-mic {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.falling-notes {
+  width: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--surface-2);
+  margin: 12px 0;
+  background: #12121a;
+}
+
+.falling-notes canvas {
+  display: block;
+  width: 100%;
+}
+
+.playback-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.speed-control select {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--surface-2);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.time-line {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.active-notes-line {
+  text-align: center;
+  font-size: 14px;
+  color: var(--warning);
+  margin: 8px 0;
+}
+
+.midi-upload {
+  margin-bottom: 16px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px dashed var(--surface-2);
+  border-radius: var(--radius);
+}
+
+.midi-upload-btn {
+  width: 100%;
+}
+
+.midi-upload-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.midi-upload-hint a {
+  color: var(--accent);
+}
+
+.song-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.song-tabs button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-2);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.song-tabs button.active {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(124, 108, 255, 0.12);
+}
+
+.song-card--midi {
+  border-style: dashed;
+}
+
+.scroll-practice .piano-wrapper {
+  margin-top: 8px;
+}
+

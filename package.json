@@ -10,8 +10,10 @@
     "dev:local": "BASE_PATH=/ vite"
   },
   "dependencies": {
+    "@tonejs/midi": "^2.0.28",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "tone": "^15.1.22"
   },
   "devDependencies": {
     "@types/react": "^19.1.2",

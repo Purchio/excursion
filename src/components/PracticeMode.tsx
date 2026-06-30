@@ -15,11 +15,12 @@ import { PianoKeyboard } from './PianoKeyboard';
 interface PracticeModeProps {
   song: Song;
   onBack: () => void;
+  onSwitchToScroll?: () => void;
 }
 
 type PracticeState = 'ready' | 'waiting' | 'correct' | 'complete';
 
-export function PracticeMode({ song, onBack }: PracticeModeProps) {
+export function PracticeMode({ song, onBack, onSwitchToScroll }: PracticeModeProps) {
   const { calibration } = useCalibration();
   const [noteIndex, setNoteIndex] = useState(0);
   const [practiceState, setPracticeState] = useState<PracticeState>('ready');
@@ -120,6 +121,15 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
           📷
         </button>
       </header>
+
+      <div className="scroll-toolbar">
+        <span className="mode-badge">Guided mode</span>
+        {onSwitchToScroll && (
+          <button type="button" className="btn-text" onClick={onSwitchToScroll}>
+            Switch to scroll
+          </button>
+        )}
+      </div>
 
       <div className="progress-bar">
         <div className="progress-fill" style={{ width: `${progress * 100}%` }} />

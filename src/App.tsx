@@ -1,19 +1,34 @@
 import { useState } from 'react';
 import { CalibrationProvider, useCalibration } from './context/CalibrationContext';
-import { SONGS } from './data/songs';
+import { getAllBuiltinSongs, loadMidiSong } from './data/songLibrary';
 import { CalibrationWizard } from './components/calibration/CalibrationWizard';
 import { OnboardingBanner } from './components/OnboardingBanner';
 import { SongPicker } from './components/SongPicker';
-import { PracticeMode } from './components/PracticeMode';
-import type { Song } from './data/songs';
+import { UnifiedPractice } from './components/UnifiedPractice';
+import type { TimedSong } from './types/song';
 import './styles/app.css';
 
 type AppView = 'home' | 'practice' | 'calibrate';
 
 function AppContent() {
   const [view, setView] = useState<AppView>('home');
-  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const [selectedSong, setSelectedSong] = useState<TimedSong | null>(null);
+  const [loadingMidiId, setLoadingMidiId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { hasAudioCalibration, hasVisualCalibration } = useCalibration();
+
+  const handleMidiSelect = async (catalogId: string) => {
+    setLoadingMidiId(catalogId);
+    setLoadError(null);
+    try {
+      const song = await loadMidiSong(catalogId);
+      setSelectedSong(song);
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : 'Failed to load MIDI');
+    } finally {
+      setLoadingMidiId(null);
+    }
+  };
 
   if (view === 'calibrate') {
     return <CalibrationWizard onClose={() => setView('home')} />;
@@ -25,8 +40,8 @@ function AppContent() {
         <div className="logo">
           <span className="logo-icon">🎹</span>
           <div>
-            <h1>Piano Coach</h1>
-            <p>Learn songs on your baby grand</p>
+            <h1>Super Piano Coach</h1>
+            <p>Falling notes · fingers · mic verify</p>
           </div>
         </div>
         <button
@@ -40,20 +55,21 @@ function AppContent() {
 
       <main>
         {selectedSong ? (
-          <PracticeMode song={selectedSong} onBack={() => setSelectedSong(null)} />
+          <UnifiedPractice song={selectedSong} onBack={() => setSelectedSong(null)} />
         ) : (
           <>
             <OnboardingBanner />
             <section className="hero">
               <p>
-                Zero experience? No problem. Pick a song, let your iPhone or iPad listen to
-                the keys, and follow the highlights — one note at a time.
+                Learn on your real piano — falling notes show what to play, synthesized audio
+                plays along, and your iPhone mic verifies each key.
               </p>
               <ul className="feature-list">
+                <li>🎵 Falling notes with left/right lanes and finger numbers</li>
+                <li>🔊 MIDI playback (synthesized piano)</li>
                 <li>🎤 Microphone hears which key you press</li>
-                <li>🎹 On-screen keyboard shows where to play</li>
-                <li>📷 Camera overlay shows keys on your real piano</li>
-                <li>🎵 Muse piano intros included</li>
+                <li>📂 Load MIDI files — Satisfaction bundled, import more anytime</li>
+                <li>📷 Camera overlay maps keys on your Knabe</li>
               </ul>
               {!hasAudioCalibration && (
                 <div className="cal-banner">
@@ -78,7 +94,14 @@ function AppContent() {
                 </p>
               )}
             </section>
-            <SongPicker songs={SONGS} onSelect={setSelectedSong} />
+            {loadError && <p className="error-text">{loadError}</p>}
+            <SongPicker
+              songs={getAllBuiltinSongs()}
+              onSelect={setSelectedSong}
+              onSelectMidi={handleMidiSelect}
+              onUpload={setSelectedSong}
+              loadingMidiId={loadingMidiId}
+            />
           </>
         )}
       </main>
