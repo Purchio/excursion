@@ -8,7 +8,7 @@ Learn to play your baby grand piano using your iPhone or iPad. Piano Coach liste
 - **Piano calibration (Phase A)** — one-time audio walkthrough: play white keys then black keys; saved permanently on your device
 - **Camera keyboard map (Phase B)** — photo + tap your keyboard edges; overlays show which real key to play
 - **Guided practice mode** — highlights the next key, shows finger numbers, advances on correct input
-- **Song library** — Twinkle Twinkle, Ode to Joy, plus simplified Muse piano intros (Madness, Space Dementia)
+- **Song library** — Twinkle Twinkle, Ode to Joy, plus simplified Muse piano intros (Madness, Space Dementia, Bliss, New Born)
 - **Installable PWA** — add to iPhone/iPad home screen for a native-like experience
 
 ## Calibrate your piano (recommended)
