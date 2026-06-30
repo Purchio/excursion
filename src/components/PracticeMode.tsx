@@ -3,6 +3,7 @@ import type { Song } from '../data/songs';
 import { useCalibration } from '../context/CalibrationContext';
 import { usePitchDetection } from '../hooks/usePitchDetection';
 import { notesMatchCalibrated } from '../utils/calibratedPitch';
+import { queryMicPermission } from '../utils/deviceUtils';
 import { midiToNote } from '../utils/noteUtils';
 import { CalibratedCameraView } from './CalibratedCameraView';
 import { MicPermissionHelp } from './MicPermissionHelp';
@@ -21,6 +22,7 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
   const [practiceState, setPracticeState] = useState<PracticeState>('ready');
   const [showCamera, setShowCamera] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
+  const [micPermission, setMicPermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
   const correctTimeoutRef = useRef<ReturnType<typeof setTimeout>>(0);
   const holdStartRef = useRef<number>(0);
 
@@ -68,11 +70,17 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
   }, [detectedMidi, currentNote, practiceState, isListening, advanceNote, audioKeys]);
 
   useEffect(() => {
+    void queryMicPermission().then(setMicPermission);
+  }, []);
+
+  useEffect(() => {
     return () => clearTimeout(correctTimeoutRef.current);
   }, []);
 
   const handleStart = async () => {
     await startListening();
+    const perm = await queryMicPermission();
+    setMicPermission(perm);
     setPracticeState('waiting');
     setNoteIndex(0);
     setCorrectCount(0);
@@ -141,6 +149,7 @@ export function PracticeMode({ song, onBack }: PracticeModeProps) {
                   onRequestMic={handleStart}
                   isListening={isListening}
                   error={micError}
+                  permissionState={micPermission}
                 />
               </>
             ) : (
