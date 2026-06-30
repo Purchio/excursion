@@ -26,23 +26,30 @@ After calibration, note detection uses your piano's tuning instead of generic pi
 
 ## Use on your iPad (no Mac required)
 
-**Live app:** [https://purchio.github.io/piano-coach/](https://purchio.github.io/piano-coach/)
+### Recommended: Vercel (simple URL, works reliably on iPad)
 
-1. Open that link in **Safari** on your iPad (not Chrome)
+1. Go to [vercel.com](https://vercel.com) and sign in with GitHub
+2. Click **Add New → Project**
+3. Import the **excursion** repo (or **piano-coach** after rename)
+4. Leave all settings as default → click **Deploy**
+5. In ~1 minute you'll get a URL like **`https://excursion-xxx.vercel.app`** — open that in **Safari** on your iPad
+
+That's the link to bookmark and add to your home screen. No `github.io` path, no manual GitHub Pages setup.
+
+### Alternative: GitHub Pages
+
+**https://purchio.github.io/excursion/** (legacy — often broken until Pages is configured)
+
+Only use this if you've already set up the `gh-pages` branch in repo Settings → Pages. Vercel is easier.
+
+### Once the app is open on your iPad
+
+1. Open the Vercel URL in **Safari** (not Chrome)
 2. When prompted, allow **microphone** and **camera** access
 3. Tap **Share → Add to Home Screen** for a full-screen app icon
 4. Tap **Calibrate piano** before your first session
 
-The app is hosted on GitHub Pages with HTTPS, which iOS requires for mic and camera. After the first deploy, it may take 1–2 minutes to go live.
-
-### One-time GitHub setup (repo owner only)
-
-If the live link shows a blank page or looks broken, enable Pages:
-
-1. GitHub → **Settings** → **Pages**
-2. Under **Build and deployment**, set **Source** to **Deploy from a branch**
-3. Set **Branch** to `gh-pages` / `/ (root)`
-4. Save, then wait 1–2 minutes and hard-refresh Safari on your iPad
+**Remember:** The app listens to your piano — it does not play song audio through the iPad speakers.
 
 ## Local development (Mac only)
 

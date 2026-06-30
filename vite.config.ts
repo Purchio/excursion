@@ -2,8 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// GitHub Pages serves from /piano-coach/ — override locally with BASE_PATH=/ npm run dev
-const base = process.env.BASE_PATH ?? '/piano-coach/';
+// Vercel uses root path; GitHub Pages uses /piano-coach/
+const base = process.env.VERCEL ? '/' : (process.env.BASE_PATH ?? '/piano-coach/');
 
 export default defineConfig({
   base,
