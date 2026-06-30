@@ -1,19 +1,15 @@
-name: Deploy to GitHub Pages
+name: Deploy built app to docs/
 
 on:
   push:
-    branches: [master, cursor/piano-coach-34fb]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
   contents: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
-  deploy:
+  deploy-docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,8 +22,14 @@ jobs:
       - run: npm ci
       - run: BASE_PATH=/excursion/ npm run build
 
-      - uses: peaceiris/actions-gh-pages@v4
+      - name: Copy build to docs/
+        run: |
+          rm -rf docs
+          mkdir -p docs
+          cp -r dist/* docs/
+
+      - uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          force_orphan: true
+          folder: docs
+          branch: gh-pages
+          clean: true
