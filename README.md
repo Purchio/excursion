@@ -22,20 +22,33 @@ Before your first practice session:
 
 After calibration, note detection uses your piano's tuning instead of generic pitch tables, and the camera view shows glowing dots on your real keys during practice.
 
-## Quick start
+## Use on your iPad (no Mac required)
+
+**Live app:** [https://purchio.github.io/excursion/](https://purchio.github.io/excursion/)
+
+1. Open that link in **Safari** on your iPad (not Chrome)
+2. When prompted, allow **microphone** and **camera** access
+3. Tap **Share → Add to Home Screen** for a full-screen app icon
+4. Tap **Calibrate piano** before your first session
+
+The app is hosted on GitHub Pages with HTTPS, which iOS requires for mic and camera. After the first deploy, it may take 1–2 minutes to go live.
+
+### One-time GitHub setup (repo owner only)
+
+If the live link shows a 404, enable Pages in the repo:
+
+1. GitHub → **Settings** → **Pages**
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**
+3. Push to `master` or re-run the **Deploy to GitHub Pages** workflow
+
+## Local development (Mac only)
 
 ```bash
 npm install
-npm run dev
+npm run dev:local
 ```
 
-Open the local URL on your iPhone or iPad (same Wi‑Fi network). For microphone and camera access, use **HTTPS** in production or Safari on a local network during development.
-
-### Install on iPhone/iPad
-
-1. Open the app in **Safari**
-2. Tap the Share button → **Add to Home Screen**
-3. Launch from your home screen like a native app
+Open the local URL on your iPhone or iPad (same Wi‑Fi network) for testing changes before deploy.
 
 ## How to practice
 

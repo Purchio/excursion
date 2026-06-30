@@ -2,7 +2,11 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// GitHub Pages serves from /excursion/ — override locally with BASE_PATH=/ npm run dev
+const base = process.env.BASE_PATH ?? '/excursion/';
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     VitePWA({
