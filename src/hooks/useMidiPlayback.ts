@@ -4,11 +4,12 @@ import type { TimedNote } from '../types/song';
 
 interface UseMidiPlaybackOptions {
   notes: TimedNote[];
+  muted?: boolean;
   onTimeUpdate?: (timeMs: number) => void;
   onComplete?: () => void;
 }
 
-export function useMidiPlayback({ notes, onTimeUpdate, onComplete }: UseMidiPlaybackOptions) {
+export function useMidiPlayback({ notes, muted = false, onTimeUpdate, onComplete }: UseMidiPlaybackOptions) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTimeMs, setCurrentTimeMs] = useState(0);
   const [speed, setSpeed] = useState(1);
@@ -34,7 +35,7 @@ export function useMidiPlayback({ notes, onTimeUpdate, onComplete }: UseMidiPlay
       oscillator: { type: 'triangle' },
       envelope: { attack: 0.02, decay: 0.2, sustain: 0.3, release: 0.8 },
     }).toDestination();
-    synth.volume.value = -8;
+    synth.volume.value = muted ? -Infinity : -8;
     synthRef.current = synth;
 
     const events = notes.map((n) => ({
@@ -55,7 +56,11 @@ export function useMidiPlayback({ notes, onTimeUpdate, onComplete }: UseMidiPlay
     part.loop = false;
     part.playbackRate = speed;
     partRef.current = part;
-  }, [notes, dispose, speed]);
+  }, [notes, dispose, speed, muted]);
+
+  useEffect(() => {
+    if (synthRef.current) synthRef.current.volume.value = muted ? -Infinity : -8;
+  }, [muted]);
 
   useEffect(() => {
     buildPart();

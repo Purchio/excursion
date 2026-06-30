@@ -1,6 +1,11 @@
 import { Midi } from '@tonejs/midi';
 import type { SongDifficulty, TimedNote, TimedSong } from '../types/song';
 import { assignFingers, handForMidi } from './fingerHeuristics';
+import {
+  dedupeSimultaneousNotes,
+  filterPlayableRange,
+  pickPianoTrackIndices,
+} from './midiSimplify';
 
 const MIN_NOTE_MS = 80;
 const MAX_SONG_MS = 10 * 60 * 1000;
@@ -43,7 +48,11 @@ export function parseMidiBuffer(
   const splitAt = 60;
   const rawNotes: TimedNote[] = [];
 
-  for (const track of midi.tracks) {
+  const pianoTracks = pickPianoTrackIndices(midi.tracks);
+  const tracksToUse =
+    pianoTracks.length > 0 ? pianoTracks.map((i) => midi.tracks[i]) : midi.tracks;
+
+  for (const track of tracksToUse) {
     if (track.channel === 9) continue;
     for (const note of track.notes) {
       const startMs = Math.max(0, note.time * 1000);
@@ -61,7 +70,8 @@ export function parseMidiBuffer(
   }
 
   rawNotes.sort((a, b) => a.startMs - b.startMs || a.midi - b.midi);
-  const notes = assignFingers(rawNotes);
+  const simplified = dedupeSimultaneousNotes(filterPlayableRange(rawNotes));
+  const notes = assignFingers(simplified);
   const durationMs = notes.reduce(
     (max, n) => Math.max(max, n.startMs + n.durationMs),
     0,

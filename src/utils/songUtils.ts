@@ -38,13 +38,7 @@ export function getActiveNotesAtTime(notes: TimedNote[], timeMs: number): TimedN
   return notes.filter((n) => timeMs >= n.startMs && timeMs < n.startMs + n.durationMs);
 }
 
-export function getNotesAtHitLine(
-  notes: TimedNote[],
-  timeMs: number,
-  windowMs = 120,
-): TimedNote[] {
-  return notes.filter((n) => Math.abs(n.startMs - timeMs) <= windowMs);
-}
+export { getNotesAtHitLine } from './scrollPractice';
 
 export function formatDuration(ms: number): string {
   const sec = Math.round(ms / 1000);

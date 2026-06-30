@@ -5,14 +5,17 @@ import { useMidiPlayback } from '../hooks/useMidiPlayback';
 import { usePitchDetection } from '../hooks/usePitchDetection';
 import { notesMatchCalibrated } from '../utils/calibratedPitch';
 import { FULL_KEYBOARD_END, FULL_KEYBOARD_START } from '../utils/keyboardLayout';
-import { formatDuration, getNotesAtHitLine } from '../utils/songUtils';
-import { midiToNote } from '../utils/noteUtils';
+import { formatDuration } from '../utils/songUtils';
+import {
+  formatLeadNotesLine,
+  getLeadNotesAtHitLine,
+  matchAnyExpected,
+} from '../utils/scrollPractice';
 import { CalibratedCameraView } from './CalibratedCameraView';
-import { DetectionDebug } from './DetectionDebug';
 import { FallingNotes } from './FallingNotes';
-import { KeyMatchBanner } from './KeyMatchBanner';
 import { MicPermissionHelp } from './MicPermissionHelp';
 import { PianoKeyboard } from './PianoKeyboard';
+import { ScrollMicBanner } from './ScrollMicBanner';
 import { queryMicPermission } from '../utils/deviceUtils';
 
 interface ScrollPracticeModeProps {
@@ -23,7 +26,8 @@ interface ScrollPracticeModeProps {
 
 export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPracticeModeProps) {
   const { calibration } = useCalibration();
-  const [micEnabled, setMicEnabled] = useState(true);
+  // Mic off by default — full MIDI arrangements + speaker playback confuse pitch detection
+  const [micEnabled, setMicEnabled] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [micPermission, setMicPermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
   const [hitCount, setHitCount] = useState(0);
@@ -36,7 +40,6 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
     detectedMidi,
     detectedNote,
     volume,
-    rawFrequency,
     error: micError,
     startListening,
     stopListening,
@@ -55,31 +58,40 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
     pause,
     resume,
     stop,
-  } = useMidiPlayback({ notes: song.notes, onComplete });
+  } = useMidiPlayback({
+    notes: song.notes,
+    muted: micEnabled,
+    onComplete,
+  });
 
-  const activeAtHit = useMemo(
-    () => getNotesAtHitLine(song.notes, currentTimeMs, 150),
+  const leadAtHit = useMemo(
+    () => getLeadNotesAtHitLine(song.notes, currentTimeMs, 150),
     [song.notes, currentTimeMs],
   );
 
-  const expectedMidi = activeAtHit[0]?.midi ?? null;
-  const highlightMidis = activeAtHit.map((n) => n.midi);
+  const primaryMidi = leadAtHit.find((n) => n.hand === 'right')?.midi
+    ?? leadAtHit[0]?.midi
+    ?? null;
+
+  const matchedNote = useMemo(
+    () =>
+      matchAnyExpected(detectedMidi, leadAtHit, (d, e) =>
+        notesMatchCalibrated(d, e, audioKeys),
+      ),
+    [detectedMidi, leadAtHit, audioKeys],
+  );
 
   useEffect(() => {
     void queryMicPermission().then(setMicPermission);
   }, []);
 
   useEffect(() => {
-    if (!micEnabled || !isPlaying) return;
-    for (const note of activeAtHit) {
-      const key = `${note.midi}-${note.startMs}`;
-      if (scoredRef.current.has(key)) continue;
-      if (notesMatchCalibrated(detectedMidi, note.midi, audioKeys)) {
-        scoredRef.current.add(key);
-        setHitCount((c) => c + 1);
-      }
-    }
-  }, [detectedMidi, activeAtHit, micEnabled, isPlaying, audioKeys]);
+    if (!micEnabled || !isPlaying || !matchedNote) return;
+    const key = `${matchedNote.midi}-${matchedNote.startMs}`;
+    if (scoredRef.current.has(key)) return;
+    scoredRef.current.add(key);
+    setHitCount((c) => c + 1);
+  }, [matchedNote, micEnabled, isPlaying]);
 
   const handleStart = async () => {
     scoredRef.current.clear();
@@ -105,6 +117,7 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
   };
 
   const progress = song.durationMs > 0 ? currentTimeMs / song.durationMs : 0;
+  const leadLine = formatLeadNotesLine(leadAtHit);
 
   return (
     <div className="practice-mode scroll-practice">
@@ -133,7 +146,7 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
             Switch to guided
           </button>
         )}
-        <label className="toggle-mic">
+        <label className="toggle-mic" title="Mutes speaker audio while on — mic only hears your piano">
           <input
             type="checkbox"
             checked={micEnabled}
@@ -161,10 +174,10 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
         <div className="note-prompt">
           <p className="prompt-label">Falling notes + playback</p>
           <p className="prompt-hint">
-            Blue = right hand, red = left. Numbers show suggested fingers.
+            Blue = right hand, red = left. Numbers = fingers.
             {micEnabled
-              ? ' Your mic verifies keys on your real piano as notes hit the line.'
-              : ' Mic verification is off — listen and follow the falling notes.'}
+              ? ' Mic verify is on — speaker audio mutes so the iPad only hears your piano.'
+              : ' Turn on Mic verify to check keys on your real piano (speaker mutes automatically).'}
           </p>
           {micEnabled && (
             <MicPermissionHelp
@@ -180,7 +193,7 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
           <PianoKeyboard
             startMidi={song.startMidi}
             endMidi={song.endMidi}
-            highlightedMidi={expectedMidi}
+            highlightedMidi={primaryMidi}
             pressedMidi={detectedMidi}
             showFullKeyboard
             fullRangeStart={FULL_KEYBOARD_START}
@@ -188,28 +201,18 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
           />
 
           {micEnabled && (
-            <>
-              <KeyMatchBanner
-                expectedMidi={expectedMidi}
-                detectedMidi={detectedMidi}
-                detectedNote={detectedNote}
-                volume={volume}
-              />
-              <DetectionDebug
-                volume={volume}
-                detectedNote={detectedNote}
-                detectedMidi={detectedMidi}
-                expectedMidi={expectedMidi}
-                rawFrequency={rawFrequency}
-                sampleCount={0}
-              />
-            </>
+            <ScrollMicBanner
+              leadNotes={leadAtHit}
+              detectedMidi={detectedMidi}
+              detectedNote={detectedNote}
+              volume={volume}
+              matchedNote={matchedNote}
+            />
           )}
 
-          {highlightMidis.length > 0 && (
+          {leadLine && (
             <p className="active-notes-line">
-              Now: {highlightMidis.map((m) => midiToNote(m)).join(' + ')}
-              {activeAtHit[0]?.finger && ` · finger ${activeAtHit[0].finger}`}
+              {micEnabled ? 'Target: ' : 'Now: '}{leadLine}
             </p>
           )}
         </>
@@ -218,7 +221,7 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
       <div className="playback-controls">
         {!isPlaying && currentTimeMs === 0 ? (
           <button type="button" className="btn-primary btn-large" onClick={handleStart}>
-            {micEnabled ? 'Start with mic' : 'Start playback'}
+            {micEnabled ? 'Start (mic on, audio muted)' : 'Start playback'}
           </button>
         ) : isPlaying ? (
           <button type="button" className="btn-secondary" onClick={handlePause}>
@@ -249,16 +252,14 @@ export function ScrollPracticeMode({ song, onBack, onSwitchToGuided }: ScrollPra
       </div>
 
       {micEnabled && isPlaying && (
-        <p className="score-line">
-          {hitCount} verified
-        </p>
+        <p className="score-line">{hitCount} notes verified on your piano</p>
       )}
 
       {micError && <p className="error-text">{micError}</p>}
 
       <CalibratedCameraView
         enabled={showCamera}
-        highlightedMidi={expectedMidi}
+        highlightedMidi={primaryMidi}
         detectedMidi={detectedMidi}
       />
     </div>

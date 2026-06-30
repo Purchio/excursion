@@ -51,8 +51,7 @@ export function KeyMatchBanner({
         <div>
           <strong>Right key!</strong>
           <p>
-            App hears <strong>{detectedNote}</strong> — matches {expectedNote}. Tap{' '}
-            <strong>Save this key</strong> below.
+            App hears <strong>{detectedNote}</strong> — matches {expectedNote}. Keep holding!
           </p>
         </div>
       </div>
